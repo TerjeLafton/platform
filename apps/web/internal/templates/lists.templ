@@ -1,0 +1,59 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/terjelafton/platform/apps/web/internal/templates/ui"
+	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
+)
+
+templ ListsPage(lists []*todov1.List) {
+	@Layout("My Lists") {
+		@ui.Navbar() {
+			<form method="POST" action="/logout">
+				<button type="submit" class="text-sm text-gray-600 hover:text-gray-900 cursor-pointer">Logout</button>
+			</form>
+		}
+		@ui.PageWide() {
+			<div class="mb-8 flex items-center justify-between">
+				<h1 class="text-2xl font-bold">My Lists</h1>
+			</div>
+			<form method="POST" action="/lists" class="mb-6 flex gap-2">
+				<input
+					type="text"
+					name="title"
+					placeholder="New list name..."
+					required
+					class="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+				/>
+				@ui.Button("Create List")
+			</form>
+			if len(lists) == 0 {
+				<p class="py-8 text-center text-gray-500">No lists yet. Create one above!</p>
+			} else {
+				<div class="space-y-3">
+					for _, list := range lists {
+						@ListCard(list)
+					}
+				</div>
+			}
+		}
+	}
+}
+
+templ ListCard(list *todov1.List) {
+	<div id={ fmt.Sprintf("list-%s", list.Id) } class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
+		<a href={ templ.SafeURL(fmt.Sprintf("/lists/%s", list.Id)) } class="font-medium text-gray-900 hover:text-blue-600">
+			{ list.Title }
+		</a>
+		<button
+			hx-delete={ fmt.Sprintf("/lists/%s", list.Id) }
+			hx-target={ fmt.Sprintf("#list-%s", list.Id) }
+			hx-swap="outerHTML"
+			hx-confirm="Delete this list?"
+			class="text-sm text-red-500 hover:text-red-700 cursor-pointer"
+		>
+			Delete
+		</button>
+	</div>
+}

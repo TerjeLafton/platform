@@ -1,0 +1,26 @@
+package templates
+
+import "github.com/terjelafton/platform/apps/web/internal/templates/ui"
+
+templ LoginPage(errorMsg string) {
+	@Layout("Login") {
+		@ui.PageNarrow() {
+			@ui.Card() {
+				<h1 class="mb-6 text-2xl font-bold">Login</h1>
+				@ui.AlertError(errorMsg)
+				<form method="POST" action="/login">
+					@ui.FormField("Email") {
+						@ui.Input("email", "email", "you@example.com", true)
+					}
+					@ui.FormField("Password") {
+						@ui.Input("password", "password", "Password", true)
+					}
+					@ui.Button("Login")
+				</form>
+				<p class="mt-4 text-sm text-gray-600">
+					Don't have an account? <a href="/register" class="text-blue-600 hover:underline">Register</a>
+				</p>
+			}
+		}
+	}
+}

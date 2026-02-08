@@ -1,0 +1,9 @@
+generate:
+    templ generate
+    tailwindcss -i static/css/input.css -o static/css/style.css --minify
+
+css-watch:
+    tailwindcss -i static/css/input.css -o static/css/style.css --watch
+
+run-server:
+    go run ./cmd/server
