@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "github.com/terjelafton/platform/libs/proto-stubs/common/v1";
+
+// ErrorResponse is shared across all services
+message ErrorResponse {
+  string code = 1;     // e.g., "VALIDATION_ERROR", "NOT_FOUND", "AUTH_ERROR", "INTERNAL_ERROR"
+  string message = 2;  // User-friendly error message
+}
