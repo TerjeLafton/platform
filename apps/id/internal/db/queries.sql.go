@@ -7,36 +7,58 @@ package db
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO id.users (email, password_hash, created_at, updated_at)
-VALUES ($1, $2, NOW(), NOW())
-RETURNING id, email, password_hash, created_at, updated_at
+INSERT INTO id.users (email, password_hash, name, created_at, updated_at)
+VALUES ($1, $2, $3, NOW(), NOW())
+RETURNING id, email, password_hash, name, avatar, avatar_content_type, created_at, updated_at
 `
 
 type CreateUserParams struct {
 	Email        string `json:"email"`
 	PasswordHash string `json:"password_hash"`
+	Name         string `json:"name"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (IDUser, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.PasswordHash)
+	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.PasswordHash, arg.Name)
 	var i IDUser
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
 		&i.PasswordHash,
+		&i.Name,
+		&i.Avatar,
+		&i.AvatarContentType,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
+const getUserAvatar = `-- name: GetUserAvatar :one
+SELECT avatar, avatar_content_type FROM id.users
+WHERE id = $1
+`
+
+type GetUserAvatarRow struct {
+	Avatar            []byte         `json:"avatar"`
+	AvatarContentType sql.NullString `json:"avatar_content_type"`
+}
+
+func (q *Queries) GetUserAvatar(ctx context.Context, id uuid.UUID) (GetUserAvatarRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserAvatar, id)
+	var i GetUserAvatarRow
+	err := row.Scan(&i.Avatar, &i.AvatarContentType)
+	return i, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, password_hash, created_at, updated_at FROM id.users
+SELECT id, email, password_hash, name, avatar, avatar_content_type, created_at, updated_at FROM id.users
 WHERE email = $1
 `
 
@@ -47,6 +69,9 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (IDUser, err
 		&i.ID,
 		&i.Email,
 		&i.PasswordHash,
+		&i.Name,
+		&i.Avatar,
+		&i.AvatarContentType,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -54,7 +79,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (IDUser, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, password_hash, created_at, updated_at FROM id.users
+SELECT id, email, password_hash, name, avatar, avatar_content_type, created_at, updated_at FROM id.users
 WHERE id = $1
 `
 
@@ -65,8 +90,28 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (IDUser, error)
 		&i.ID,
 		&i.Email,
 		&i.PasswordHash,
+		&i.Name,
+		&i.Avatar,
+		&i.AvatarContentType,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const updateUserAvatar = `-- name: UpdateUserAvatar :exec
+UPDATE id.users
+SET avatar = $2, avatar_content_type = $3, updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateUserAvatarParams struct {
+	ID                uuid.UUID      `json:"id"`
+	Avatar            []byte         `json:"avatar"`
+	AvatarContentType sql.NullString `json:"avatar_content_type"`
+}
+
+func (q *Queries) UpdateUserAvatar(ctx context.Context, arg UpdateUserAvatarParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserAvatar, arg.ID, arg.Avatar, arg.AvatarContentType)
+	return err
 }

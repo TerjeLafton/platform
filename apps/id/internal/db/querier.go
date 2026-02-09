@@ -12,8 +12,10 @@ import (
 
 type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (IDUser, error)
+	GetUserAvatar(ctx context.Context, id uuid.UUID) (GetUserAvatarRow, error)
 	GetUserByEmail(ctx context.Context, email string) (IDUser, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (IDUser, error)
+	UpdateUserAvatar(ctx context.Context, arg UpdateUserAvatarParams) error
 }
 
 var _ Querier = (*Queries)(nil)
