@@ -20,6 +20,26 @@ var (
 		Field:   "title",
 		Message: "Item title must be less than 500 characters",
 	}
+	ErrEmailRequired = &ValidationError{
+		Field:   "email",
+		Message: "Email is required",
+	}
+	ErrCannotShareWithSelf = &ValidationError{
+		Field:   "email",
+		Message: "You can't share a list with yourself",
+	}
+	ErrNotListOwner = &ValidationError{
+		Field:   "user_id",
+		Message: "Only the list owner can do this",
+	}
+	ErrNotListMember = &ValidationError{
+		Field:   "user_id",
+		Message: "You are not a member of this list",
+	}
+	ErrAlreadyMember = &ValidationError{
+		Field:   "email",
+		Message: "This user is already a member of this list",
+	}
 )
 
 func (e *ValidationError) Error() string {
@@ -56,6 +76,14 @@ func translateDBError(err error) error {
 		return &ValidationError{
 			Field:   "list_id",
 			Message: "List not found",
+		}
+	}
+
+	// Duplicate list member
+	if strings.Contains(errStr, "list_members_pkey") {
+		return &ValidationError{
+			Field:   "email",
+			Message: "This user is already a member of this list",
 		}
 	}
 
