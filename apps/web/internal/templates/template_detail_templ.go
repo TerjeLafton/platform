@@ -86,14 +86,14 @@ func TemplateDetailPage(userID string, t *todov1.Template, items []*todov1.Templ
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-6\"><a href=\"/todo/templates\" class=\"text-sm text-link hover:underline\">&larr; Back to templates</a></div><h1 class=\"mb-8 text-2xl font-bold\">Template Settings</h1> <div class=\"mb-8\"><h2 class=\"mb-3 text-lg font-semibold\">Name</h2><form method=\"POST\" action=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-6\"><a href=\"/templates\" class=\"text-sm text-link hover:underline\">&larr; Back to templates</a></div><h1 class=\"mb-8 text-2xl font-bold\">Template Settings</h1> <div class=\"mb-8\"><h2 class=\"mb-3 text-lg font-semibold\">Name</h2><form method=\"POST\" action=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 templ.SafeURL
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/todo/templates/%s/title", t.Id)))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/templates/%s/title", t.Id)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/template_detail.templ`, Line: 27, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/template_detail.templ`, Line: 27, Col: 69}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -125,9 +125,9 @@ func TemplateDetailPage(userID string, t *todov1.Template, items []*todov1.Templ
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/todo/templates/%s/items", t.Id))
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/templates/%s/items", t.Id))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/template_detail.templ`, Line: 44, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/template_detail.templ`, Line: 44, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -162,15 +162,15 @@ func TemplateDetailPage(userID string, t *todov1.Template, items []*todov1.Templ
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/todo/templates/%s", t.Id))
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/templates/%s", t.Id))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/template_detail.templ`, Line: 73, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/template_detail.templ`, Line: 73, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-confirm=\"Are you sure you want to delete this template? This cannot be undone.\" hx-on::after-request=\"if(event.detail.successful) window.location.href='/todo/templates'\" class=\"rounded bg-danger px-4 py-2 text-sm font-medium text-white hover:opacity-90 cursor-pointer\">Delete Template</button></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-confirm=\"Are you sure you want to delete this template? This cannot be undone.\" hx-on::after-request=\"if(event.detail.successful) window.location.href='/templates'\" class=\"rounded bg-danger px-4 py-2 text-sm font-medium text-white hover:opacity-90 cursor-pointer\">Delete Template</button></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -242,9 +242,9 @@ func TemplateItemRow(templateID string, item *todov1.TemplateItem) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/todo/templates/%s/items/%s", templateID, item.Id))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/templates/%s/items/%s", templateID, item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/template_detail.templ`, Line: 96, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/template_detail.templ`, Line: 96, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {

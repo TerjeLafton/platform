@@ -87,7 +87,7 @@ func HandleCreateTemplate(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 			return
 		}
 
-		http.Redirect(w, r, "/todo/templates", http.StatusSeeOther)
+		http.Redirect(w, r, "/templates", http.StatusSeeOther)
 	}
 }
 
@@ -133,7 +133,7 @@ func HandleTemplateDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 			}
 		}
 
-		http.Redirect(w, r, "/todo/templates", http.StatusSeeOther)
+		http.Redirect(w, r, "/templates", http.StatusSeeOther)
 	}
 }
 
@@ -150,7 +150,7 @@ func HandleUpdateTemplateTitle(nc *nats.Conn, logger *slog.Logger) http.HandlerF
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/todo/templates/%s", id), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/templates/%s", id), http.StatusSeeOther)
 	}
 }
 

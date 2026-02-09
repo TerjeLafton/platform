@@ -21,7 +21,7 @@ templ TemplatesPage(userID string, templateList []*todov1.Template) {
 			<div class="mb-8 flex items-center justify-between">
 				<h1 class="text-2xl font-bold">Templates</h1>
 			</div>
-			<form method="POST" action="/todo/templates" class="mb-6 flex gap-2">
+			<form method="POST" action="/templates" class="mb-6 flex gap-2">
 				<input
 					type="text"
 					name="title"
@@ -47,7 +47,7 @@ templ TemplatesPage(userID string, templateList []*todov1.Template) {
 templ TemplateCard(t *todov1.Template) {
 	<div class="group relative rounded-lg border border-border-subtle bg-surface p-5 transition-colors hover:border-border">
 		<a
-			href={ templ.SafeURL(fmt.Sprintf("/todo/templates/%s", t.Id)) }
+			href={ templ.SafeURL(fmt.Sprintf("/templates/%s", t.Id)) }
 			class="font-semibold text-text-primary after:absolute after:inset-0"
 		>
 			{ t.Title }

@@ -86,7 +86,7 @@ func ListsPage(userID string, lists []*todov1.List) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-8 flex items-center justify-between\"><h1 class=\"text-2xl font-bold\">Lists</h1><div class=\"flex items-center gap-4\"><a href=\"/todo/templates\" class=\"text-sm text-link hover:underline\">Templates</a> <a href=\"/todo/new\" class=\"rounded bg-brand px-4 py-2 text-sm font-medium text-brand-text hover:bg-brand-hover\">New List</a></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-8 flex items-center justify-between\"><h1 class=\"text-2xl font-bold\">Lists</h1><div class=\"flex items-center gap-4\"><a href=\"/templates\" class=\"text-sm text-link hover:underline\">Templates</a> <a href=\"/todo/new\" class=\"rounded bg-brand px-4 py-2 text-sm font-medium text-brand-text hover:bg-brand-hover\">New List</a></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
