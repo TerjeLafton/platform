@@ -223,3 +223,84 @@ func DeleteItem(nc *nats.Conn, id, userID string) error {
 
 	return nil
 }
+
+func AddListMember(nc *nats.Conn, listID, userID, memberEmail string) (*todov1.ListMember, error) {
+	req := &todov1.AddListMemberRequest{
+		ListId:      listID,
+		UserId:      userID,
+		MemberEmail: memberEmail,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal add list member request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.list.add_member", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp todov1.AddListMemberResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil && resp.Member != nil {
+		return resp.Member, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from todo service")
+}
+
+func RemoveListMember(nc *nats.Conn, listID, userID, memberUserID string) error {
+	req := &todov1.RemoveListMemberRequest{
+		ListId:       listID,
+		UserId:       userID,
+		MemberUserId: memberUserID,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshal remove list member request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.list.remove_member", data, requestTimeout)
+	if err != nil {
+		return fmt.Errorf("nats request: %w", err)
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return svcErr
+	}
+
+	return nil
+}
+
+func GetListMembers(nc *nats.Conn, listID, userID string) ([]*todov1.ListMember, error) {
+	req := &todov1.GetListMembersRequest{
+		ListId: listID,
+		UserId: userID,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal get list members request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.list.get_members", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp todov1.GetListMembersResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil {
+		return resp.Members, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from todo service")
+}

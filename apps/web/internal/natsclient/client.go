@@ -190,6 +190,33 @@ func UpdateAvatar(nc *nats.Conn, userID string, avatar []byte, contentType strin
 	return nil
 }
 
+func GetUserByEmail(nc *nats.Conn, email string) (*idv1.User, error) {
+	req := &idv1.GetUserByEmailRequest{
+		Email: email,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal get user by email request: %w", err)
+	}
+
+	msg, err := nc.Request("id.user.get_by_email", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp idv1.GetUserByEmailResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil && resp.User != nil {
+		return resp.User, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from id service")
+}
+
 func parseError(data []byte) *ServiceError {
 	var errResp commonv1.ErrorResponse
 	if err := proto.Unmarshal(data, &errResp); err == nil && errResp.Code != "" {
