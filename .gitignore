@@ -45,3 +45,6 @@ temp/
 
 # Plans/design docs
 docs/plans/
+
+# Git worktrees
+.worktrees/
