@@ -56,6 +56,8 @@ templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 						@ItemRow(item)
 					}
 				</div>
+				<div sse-swap="item.toggled" hx-swap="none"></div>
+				<div sse-swap="item.deleted" hx-swap="none"></div>
 			</div>
 			if len(items) == 0 {
 				<p id="empty-state" class="py-8 text-center text-text-muted">No items yet. Add one above!</p>
