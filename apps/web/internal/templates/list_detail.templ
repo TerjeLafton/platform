@@ -7,7 +7,7 @@ import (
 	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
 )
 
-templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
+templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item, members []*todov1.ListMember) {
 	@Layout(list.Title) {
 		@ui.Navbar(userID) {
 			<form method="POST" action="/logout">
@@ -21,6 +21,11 @@ templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 			<div class="mb-6" id="list-title-section">
 				@ListTitle(list)
 			</div>
+			if !list.IsOwner {
+				<p class="mb-4 text-sm text-text-muted">
+					Shared by { list.OwnerName }
+				</p>
+			}
 			<form
 				hx-post={ fmt.Sprintf("/todo/%s/items", list.Id) }
 				hx-target="#items-list"
@@ -45,6 +50,35 @@ templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 			if len(items) == 0 {
 				<p id="empty-state" class="py-8 text-center text-text-muted">No items yet. Add one above!</p>
 			}
+			if list.IsOwner {
+				<div class="mt-10 border-t border-border-subtle pt-8">
+					<h2 class="mb-4 text-lg font-semibold">Members</h2>
+					<form
+						hx-post={ fmt.Sprintf("/todo/%s/members", list.Id) }
+						hx-target="#members-list"
+						hx-swap="beforeend"
+						hx-on::after-request="if(event.detail.successful) this.reset()"
+						class="mb-4 flex gap-2"
+					>
+						<input
+							type="email"
+							name="email"
+							placeholder="Email address..."
+							required
+							class="flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted"
+						/>
+						@ui.Button("Share")
+					</form>
+					<div id="members-list" class="space-y-2">
+						for _, member := range members {
+							@MemberRow(list.Id, member)
+						}
+					</div>
+					if len(members) == 0 {
+						<p class="py-4 text-center text-text-muted">Not shared with anyone yet.</p>
+					}
+				</div>
+			}
 		}
 	}
 }
@@ -52,37 +86,39 @@ templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 templ ListTitle(list *todov1.List) {
 	<div class="flex items-center gap-3">
 		<h1 class="text-2xl font-bold" id="title-display">{ list.Title }</h1>
-		<button
-			onclick="document.getElementById('title-display').style.display='none'; document.getElementById('title-edit').style.display='flex'; this.style.display='none'; document.getElementById('title-input').focus();"
-			class="text-sm text-text-muted hover:text-text-secondary cursor-pointer"
-		>
-			Edit
-		</button>
-		<form
-			id="title-edit"
-			style="display:none"
-			hx-post={ fmt.Sprintf("/todo/%s/title", list.Id) }
-			hx-target="#list-title-section"
-			hx-swap="innerHTML"
-			class="flex items-center gap-2"
-		>
-			<input
-				id="title-input"
-				type="text"
-				name="title"
-				value={ list.Title }
-				required
-				class="rounded border bg-input-bg border-input-border px-3 py-1 text-sm text-text-primary focus:border-brand focus:outline-none"
-			/>
-			<button type="submit" class="text-sm text-link hover:text-link-hover cursor-pointer">Save</button>
+		if list.IsOwner {
 			<button
-				type="button"
-				onclick="document.getElementById('title-display').style.display=''; document.getElementById('title-edit').style.display='none'; this.parentElement.previousElementSibling.previousElementSibling.style.display='';"
+				onclick="document.getElementById('title-display').style.display='none'; document.getElementById('title-edit').style.display='flex'; this.style.display='none'; document.getElementById('title-input').focus();"
 				class="text-sm text-text-muted hover:text-text-secondary cursor-pointer"
 			>
-				Cancel
+				Edit
 			</button>
-		</form>
+			<form
+				id="title-edit"
+				style="display:none"
+				hx-post={ fmt.Sprintf("/todo/%s/title", list.Id) }
+				hx-target="#list-title-section"
+				hx-swap="innerHTML"
+				class="flex items-center gap-2"
+			>
+				<input
+					id="title-input"
+					type="text"
+					name="title"
+					value={ list.Title }
+					required
+					class="rounded border bg-input-bg border-input-border px-3 py-1 text-sm text-text-primary focus:border-brand focus:outline-none"
+				/>
+				<button type="submit" class="text-sm text-link hover:text-link-hover cursor-pointer">Save</button>
+				<button
+					type="button"
+					onclick="document.getElementById('title-display').style.display=''; document.getElementById('title-edit').style.display='none'; this.parentElement.previousElementSibling.previousElementSibling.style.display='';"
+					class="text-sm text-text-muted hover:text-text-secondary cursor-pointer"
+				>
+					Cancel
+				</button>
+			</form>
+		}
 	</div>
 }
 
@@ -113,6 +149,23 @@ templ ItemRow(item *todov1.Item) {
 			class="text-sm text-delete hover:text-delete-hover cursor-pointer"
 		>
 			Delete
+		</button>
+	</div>
+}
+
+templ MemberRow(listID string, member *todov1.ListMember) {
+	<div id={ fmt.Sprintf("member-%s", member.UserId) } class="flex items-center justify-between rounded border border-border-subtle bg-surface px-4 py-3">
+		<div>
+			<span class="text-sm font-medium text-text-primary">{ member.Name }</span>
+			<span class="ml-2 text-sm text-text-muted">{ member.Email }</span>
+		</div>
+		<button
+			hx-delete={ fmt.Sprintf("/todo/%s/members/%s", listID, member.UserId) }
+			hx-target={ fmt.Sprintf("#member-%s", member.UserId) }
+			hx-swap="outerHTML"
+			class="text-sm text-delete hover:text-delete-hover cursor-pointer"
+		>
+			Remove
 		</button>
 	</div>
 }

@@ -8,7 +8,7 @@ import (
 )
 
 templ ListsPage(userID string, lists []*todov1.List) {
-	@Layout("My Lists") {
+	@Layout("Lists") {
 		@ui.Navbar(userID) {
 			<form method="POST" action="/logout">
 				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
@@ -16,7 +16,7 @@ templ ListsPage(userID string, lists []*todov1.List) {
 		}
 		@ui.PageWide() {
 			<div class="mb-8 flex items-center justify-between">
-				<h1 class="text-2xl font-bold">My Lists</h1>
+				<h1 class="text-2xl font-bold">Lists</h1>
 			</div>
 			<form method="POST" action="/todo" class="mb-6 flex gap-2">
 				<input
@@ -50,17 +50,33 @@ templ ListCard(list *todov1.List) {
 			>
 				{ list.Title }
 			</a>
-			<button
-				hx-delete={ fmt.Sprintf("/todo/%s", list.Id) }
-				hx-target={ fmt.Sprintf("#list-%s", list.Id) }
-				hx-swap="outerHTML"
-				hx-confirm="Delete this list?"
-				class="relative z-10 text-sm text-text-muted opacity-0 transition-opacity hover:text-delete cursor-pointer group-hover:opacity-100"
-			>
-				Delete
-			</button>
+			if list.IsOwner {
+				<button
+					hx-delete={ fmt.Sprintf("/todo/%s", list.Id) }
+					hx-target={ fmt.Sprintf("#list-%s", list.Id) }
+					hx-swap="outerHTML"
+					hx-confirm="Delete this list?"
+					class="relative z-10 text-sm text-text-muted opacity-0 transition-opacity hover:text-delete cursor-pointer group-hover:opacity-100"
+				>
+					Delete
+				</button>
+			} else {
+				<button
+					hx-post={ fmt.Sprintf("/todo/%s/leave", list.Id) }
+					hx-target={ fmt.Sprintf("#list-%s", list.Id) }
+					hx-swap="outerHTML"
+					hx-confirm="Leave this list?"
+					class="relative z-10 text-sm text-text-muted opacity-0 transition-opacity hover:text-delete cursor-pointer group-hover:opacity-100"
+				>
+					Leave
+				</button>
+			}
 		</div>
 		<p class="mt-3 text-sm text-text-muted">
+			if !list.IsOwner {
+				<span>by { list.OwnerName }</span>
+				<span class="mx-1">&middot;</span>
+			}
 			if list.TotalItems == 0 {
 				No items
 			} else {
