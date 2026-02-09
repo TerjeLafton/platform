@@ -28,22 +28,6 @@ func HandleListsPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	}
 }
 
-func HandleCreateList(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		userID := middleware.UserIDFromContext(r.Context())
-		title := r.FormValue("title")
-
-		_, err := natsclient.CreateList(nc, userID, title)
-		if err != nil {
-			logger.Warn("failed to create list", "error", err, "user_id", userID, "title", title)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		http.Redirect(w, r, "/todo", http.StatusSeeOther)
-	}
-}
-
 func HandleDeleteList(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
