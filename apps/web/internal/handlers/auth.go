@@ -34,7 +34,6 @@ func HandleLogin(nc *nats.Conn, cookieName string, logger *slog.Logger) http.Han
 			SameSite: http.SameSiteLaxMode,
 		})
 
-		logger.Info("user logged in", "email", email)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
@@ -64,7 +63,6 @@ func HandleRegister(nc *nats.Conn, cookieName string, logger *slog.Logger) http.
 			SameSite: http.SameSiteLaxMode,
 		})
 
-		logger.Info("user registered", "email", email)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }

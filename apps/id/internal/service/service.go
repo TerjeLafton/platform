@@ -16,7 +16,7 @@ func New(queries db.Querier, jwtSecret string, logger *slog.Logger) *Service {
 	return &Service{
 		queries:   queries,
 		jwtSecret: jwtSecret,
-		logger:    logger.With("component", "service"),
+		logger:    logger.With("module", "service"),
 	}
 }
 

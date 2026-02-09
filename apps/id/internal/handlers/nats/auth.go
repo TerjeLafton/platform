@@ -38,7 +38,6 @@ func (h *Handler) HandleRegister(msg *nats.Msg) {
 		Token: token,
 	}
 
-	h.logger.Info("register request completed", "user_id", user.ID)
 	h.respondSuccess(msg, resp)
 }
 
@@ -76,7 +75,6 @@ func (h *Handler) HandleLogin(msg *nats.Msg) {
 		Token: token,
 	}
 
-	h.logger.Info("login request completed", "user_id", user.ID)
 	h.respondSuccess(msg, resp)
 }
 

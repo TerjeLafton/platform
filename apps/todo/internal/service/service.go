@@ -18,6 +18,6 @@ func New(queries *db.Queries, nc *nats.Conn, logger *slog.Logger) *Service {
 	return &Service{
 		queries: queries,
 		nc:      nc,
-		logger:  logger.With("component", "service"),
+		logger:  logger.With("module", "service"),
 	}
 }

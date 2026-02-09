@@ -20,7 +20,7 @@ func main() {
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
-	}))
+	})).With("service", "web")
 
 	nc, err := nats.Connect(cfg.NATSURL)
 	if err != nil {
@@ -30,8 +30,11 @@ func main() {
 
 	logger.Info("connected to NATS", "server", nc.ConnectedUrl())
 
+	handlerLogger := logger.With("module", "handler")
+	mwLogger := logger.With("module", "middleware")
+
 	cookieName := "auth_token"
-	requireAuth := middleware.RequireAuth(nc, cookieName, logger)
+	requireAuth := middleware.RequireAuth(nc, cookieName, mwLogger)
 
 	mux := http.NewServeMux()
 
@@ -40,20 +43,21 @@ func main() {
 
 	// Public routes
 	mux.HandleFunc("GET /login", handlers.HandleLoginPage)
-	mux.HandleFunc("POST /login", handlers.HandleLogin(nc, cookieName, logger))
+	mux.HandleFunc("POST /login", handlers.HandleLogin(nc, cookieName, handlerLogger))
 	mux.HandleFunc("GET /register", handlers.HandleRegisterPage)
-	mux.HandleFunc("POST /register", handlers.HandleRegister(nc, cookieName, logger))
+	mux.HandleFunc("POST /register", handlers.HandleRegister(nc, cookieName, handlerLogger))
 
 	// Protected routes
-	mux.Handle("GET /{$}", requireAuth(handlers.HandleListsPage(nc, logger)))
+	mux.Handle("GET /{$}", requireAuth(http.HandlerFunc(handlers.HandleHomePage)))
 	mux.Handle("POST /logout", requireAuth(handlers.HandleLogout(cookieName)))
-	mux.Handle("POST /lists", requireAuth(handlers.HandleCreateList(nc, logger)))
-	mux.Handle("GET /lists/{id}", requireAuth(handlers.HandleListDetail(nc, logger)))
-	mux.Handle("DELETE /lists/{id}", requireAuth(handlers.HandleDeleteList(nc, logger)))
-	mux.Handle("POST /lists/{id}/title", requireAuth(handlers.HandleUpdateListTitle(nc, logger)))
-	mux.Handle("POST /lists/{id}/items", requireAuth(handlers.HandleCreateItem(nc, logger)))
-	mux.Handle("POST /items/{id}/toggle", requireAuth(handlers.HandleToggleItem(nc, logger)))
-	mux.Handle("DELETE /items/{id}", requireAuth(handlers.HandleDeleteItem(nc, logger)))
+	mux.Handle("GET /todo/{$}", requireAuth(handlers.HandleListsPage(nc, handlerLogger)))
+	mux.Handle("POST /todo", requireAuth(handlers.HandleCreateList(nc, handlerLogger)))
+	mux.Handle("GET /todo/{id}", requireAuth(handlers.HandleListDetail(nc, handlerLogger)))
+	mux.Handle("DELETE /todo/{id}", requireAuth(handlers.HandleDeleteList(nc, handlerLogger)))
+	mux.Handle("POST /todo/{id}/title", requireAuth(handlers.HandleUpdateListTitle(nc, handlerLogger)))
+	mux.Handle("POST /todo/{id}/items", requireAuth(handlers.HandleCreateItem(nc, handlerLogger)))
+	mux.Handle("POST /todo/items/{id}/toggle", requireAuth(handlers.HandleToggleItem(nc, handlerLogger)))
+	mux.Handle("DELETE /todo/items/{id}", requireAuth(handlers.HandleDeleteItem(nc, handlerLogger)))
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: mux}

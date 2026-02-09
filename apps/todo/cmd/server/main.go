@@ -21,7 +21,7 @@ func main() {
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
-	}))
+	})).With("service", "todo")
 
 	dbConn, err := sql.Open("postgres", cfg.DatabaseURL)
 	if err != nil {

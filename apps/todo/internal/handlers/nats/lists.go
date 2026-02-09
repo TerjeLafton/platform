@@ -48,8 +48,6 @@ func (h *Handler) HandleCreateList(msg *nats.Msg) {
 			UpdatedAt: timestamppb.New(list.UpdatedAt),
 		},
 	})
-
-	h.logger.Info("list created", "list_id", list.ID, "user_id", userID)
 }
 
 func (h *Handler) HandleGetListsByUser(msg *nats.Msg) {
@@ -77,19 +75,19 @@ func (h *Handler) HandleGetListsByUser(msg *nats.Msg) {
 	pbLists := make([]*todov1.List, len(lists))
 	for i, list := range lists {
 		pbLists[i] = &todov1.List{
-			Id:        list.ID.String(),
-			UserId:    list.UserID.String(),
-			Title:     list.Title,
-			CreatedAt: timestamppb.New(list.CreatedAt),
-			UpdatedAt: timestamppb.New(list.UpdatedAt),
+			Id:             list.ID.String(),
+			UserId:         list.UserID.String(),
+			Title:          list.Title,
+			CreatedAt:      timestamppb.New(list.CreatedAt),
+			UpdatedAt:      timestamppb.New(list.UpdatedAt),
+			TotalItems:     list.TotalItems,
+			CompletedItems: list.CompletedItems,
 		}
 	}
 
 	h.respondSuccess(msg, &todov1.GetListsByUserResponse{
 		Lists: pbLists,
 	})
-
-	h.logger.Info("lists retrieved", "user_id", userID, "count", len(lists))
 }
 
 func (h *Handler) HandleUpdateListTitle(msg *nats.Msg) {
@@ -135,8 +133,6 @@ func (h *Handler) HandleUpdateListTitle(msg *nats.Msg) {
 			UpdatedAt: timestamppb.New(list.UpdatedAt),
 		},
 	})
-
-	h.logger.Info("list updated", "list_id", listID, "user_id", userID)
 }
 
 func (h *Handler) HandleDeleteList(msg *nats.Msg) {
@@ -173,6 +169,4 @@ func (h *Handler) HandleDeleteList(msg *nats.Msg) {
 	}
 
 	h.respondSuccess(msg, &todov1.DeleteListResponse{})
-
-	h.logger.Info("list deleted", "list_id", listID, "user_id", userID)
 }

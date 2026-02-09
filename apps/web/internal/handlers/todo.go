@@ -16,7 +16,7 @@ func HandleListsPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		lists, err := natsclient.GetListsByUser(nc, userID)
 		if err != nil {
-			logger.Error("failed to get lists", "error", err)
+			logger.Error("failed to get lists", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load lists", http.StatusInternalServerError)
 			return
 		}
@@ -32,13 +32,12 @@ func HandleCreateList(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		_, err := natsclient.CreateList(nc, userID, title)
 		if err != nil {
-			logger.Warn("failed to create list", "error", err)
+			logger.Warn("failed to create list", "error", err, "user_id", userID, "title", title)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		logger.Info("list created", "user_id", userID, "title", title)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/todo", http.StatusSeeOther)
 	}
 }
 
@@ -49,12 +48,11 @@ func HandleDeleteList(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		err := natsclient.DeleteList(nc, id, userID)
 		if err != nil {
-			logger.Warn("failed to delete list", "error", err)
+			logger.Warn("failed to delete list", "error", err, "user_id", userID, "list_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		logger.Info("list deleted", "user_id", userID, "list_id", id)
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -66,7 +64,7 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		lists, err := natsclient.GetListsByUser(nc, userID)
 		if err != nil {
-			logger.Error("failed to get lists", "error", err)
+			logger.Error("failed to get lists", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load list", http.StatusInternalServerError)
 			return
 		}
@@ -77,7 +75,7 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 			if list.Id == id {
 				items, err := natsclient.GetAllItemsFromList(nc, id, userID)
 				if err != nil {
-					logger.Error("failed to get items", "error", err)
+					logger.Error("failed to get items", "error", err, "user_id", userID, "list_id", id)
 					http.Error(w, "Failed to load items", http.StatusInternalServerError)
 					return
 				}
@@ -89,7 +87,7 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 		}
 
 		if !found {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.Redirect(w, r, "/todo", http.StatusSeeOther)
 		}
 	}
 }
@@ -102,12 +100,11 @@ func HandleUpdateListTitle(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc 
 
 		list, err := natsclient.UpdateListTitle(nc, id, userID, title)
 		if err != nil {
-			logger.Warn("failed to update list title", "error", err)
+			logger.Warn("failed to update list title", "error", err, "user_id", userID, "list_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		logger.Info("list title updated", "user_id", userID, "list_id", id)
 		templates.ListTitle(list).Render(r.Context(), w)
 	}
 }
@@ -120,12 +117,11 @@ func HandleCreateItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		item, err := natsclient.CreateItem(nc, listID, userID, title)
 		if err != nil {
-			logger.Warn("failed to create item", "error", err)
+			logger.Warn("failed to create item", "error", err, "user_id", userID, "list_id", listID)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		logger.Info("item created", "user_id", userID, "list_id", listID, "title", title)
 		templates.ItemRow(item).Render(r.Context(), w)
 	}
 }
@@ -137,12 +133,11 @@ func HandleToggleItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		item, err := natsclient.ToggleItemCompleted(nc, id, userID)
 		if err != nil {
-			logger.Warn("failed to toggle item", "error", err)
+			logger.Warn("failed to toggle item", "error", err, "user_id", userID, "item_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		logger.Info("item toggled", "user_id", userID, "item_id", id)
 		templates.ItemRow(item).Render(r.Context(), w)
 	}
 }
@@ -154,12 +149,11 @@ func HandleDeleteItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		err := natsclient.DeleteItem(nc, id, userID)
 		if err != nil {
-			logger.Warn("failed to delete item", "error", err)
+			logger.Warn("failed to delete item", "error", err, "user_id", userID, "item_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		logger.Info("item deleted", "user_id", userID, "item_id", id)
 		w.WriteHeader(http.StatusOK)
 	}
 }

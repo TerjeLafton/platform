@@ -17,7 +17,7 @@ type Handler struct {
 func New(svc *service.Service, logger *slog.Logger) *Handler {
 	return &Handler{
 		service: svc,
-		logger:  logger.With("component", "nats-handler"),
+		logger:  logger.With("module", "handler"),
 	}
 }
 

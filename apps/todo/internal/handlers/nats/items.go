@@ -56,8 +56,6 @@ func (h *Handler) HandleCreateItem(msg *nats.Msg) {
 			UpdatedAt: timestamppb.New(item.UpdatedAt),
 		},
 	})
-
-	h.logger.Info("item created", "item_id", item.ID, "list_id", listID, "user_id", userID)
 }
 
 func (h *Handler) HandleGetAllItemsFromList(msg *nats.Msg) {
@@ -104,8 +102,6 @@ func (h *Handler) HandleGetAllItemsFromList(msg *nats.Msg) {
 	h.respondSuccess(msg, &todov1.GetAllItemsFromListResponse{
 		Items: pbItems,
 	})
-
-	h.logger.Info("items retrieved", "list_id", listID, "user_id", userID, "count", len(items))
 }
 
 func (h *Handler) HandleToggleItemCompleted(msg *nats.Msg) {
@@ -152,8 +148,6 @@ func (h *Handler) HandleToggleItemCompleted(msg *nats.Msg) {
 			UpdatedAt: timestamppb.New(item.UpdatedAt),
 		},
 	})
-
-	h.logger.Info("item toggled", "item_id", itemID, "user_id", userID, "completed", item.Completed)
 }
 
 func (h *Handler) HandleDeleteItem(msg *nats.Msg) {
@@ -190,6 +184,4 @@ func (h *Handler) HandleDeleteItem(msg *nats.Msg) {
 	}
 
 	h.respondSuccess(msg, &todov1.DeleteItemResponse{})
-
-	h.logger.Info("item deleted", "item_id", itemID, "user_id", userID)
 }
