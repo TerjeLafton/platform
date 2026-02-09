@@ -99,6 +99,7 @@ message ToggleItemCompletedResponse {
 message DeleteItemRequest {
   string id = 1;
   string user_id = 2;
+  string list_id = 3;
 }
 
 message DeleteItemResponse {}
@@ -113,6 +114,11 @@ message ListCreatedEvent {
 message ItemCompletedEvent {
   Item item = 1;
   google.protobuf.Timestamp occurred_at = 2;
+}
+
+message ItemDeletedEvent {
+  string list_id = 1;
+  string item_id = 2;
 }
 
 // Sharing Operations

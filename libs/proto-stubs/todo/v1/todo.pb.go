@@ -891,6 +891,7 @@ type DeleteItemRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ListId        string                 `protobuf:"bytes,3,opt,name=list_id,json=listId,proto3" json:"list_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -935,6 +936,13 @@ func (x *DeleteItemRequest) GetId() string {
 func (x *DeleteItemRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
+	}
+	return ""
+}
+
+func (x *DeleteItemRequest) GetListId() string {
+	if x != nil {
+		return x.ListId
 	}
 	return ""
 }
@@ -1079,6 +1087,58 @@ func (x *ItemCompletedEvent) GetOccurredAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type ItemDeletedEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ListId        string                 `protobuf:"bytes,1,opt,name=list_id,json=listId,proto3" json:"list_id,omitempty"`
+	ItemId        string                 `protobuf:"bytes,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ItemDeletedEvent) Reset() {
+	*x = ItemDeletedEvent{}
+	mi := &file_todo_v1_todo_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ItemDeletedEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ItemDeletedEvent) ProtoMessage() {}
+
+func (x *ItemDeletedEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ItemDeletedEvent.ProtoReflect.Descriptor instead.
+func (*ItemDeletedEvent) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ItemDeletedEvent) GetListId() string {
+	if x != nil {
+		return x.ListId
+	}
+	return ""
+}
+
+func (x *ItemDeletedEvent) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
 type ListMember struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -1091,7 +1151,7 @@ type ListMember struct {
 
 func (x *ListMember) Reset() {
 	*x = ListMember{}
-	mi := &file_todo_v1_todo_proto_msgTypes[20]
+	mi := &file_todo_v1_todo_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1103,7 +1163,7 @@ func (x *ListMember) String() string {
 func (*ListMember) ProtoMessage() {}
 
 func (x *ListMember) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[20]
+	mi := &file_todo_v1_todo_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1116,7 +1176,7 @@ func (x *ListMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMember.ProtoReflect.Descriptor instead.
 func (*ListMember) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{20}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ListMember) GetUserId() string {
@@ -1158,7 +1218,7 @@ type AddListMemberRequest struct {
 
 func (x *AddListMemberRequest) Reset() {
 	*x = AddListMemberRequest{}
-	mi := &file_todo_v1_todo_proto_msgTypes[21]
+	mi := &file_todo_v1_todo_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1170,7 +1230,7 @@ func (x *AddListMemberRequest) String() string {
 func (*AddListMemberRequest) ProtoMessage() {}
 
 func (x *AddListMemberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[21]
+	mi := &file_todo_v1_todo_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1183,7 +1243,7 @@ func (x *AddListMemberRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddListMemberRequest.ProtoReflect.Descriptor instead.
 func (*AddListMemberRequest) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{21}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *AddListMemberRequest) GetListId() string {
@@ -1216,7 +1276,7 @@ type AddListMemberResponse struct {
 
 func (x *AddListMemberResponse) Reset() {
 	*x = AddListMemberResponse{}
-	mi := &file_todo_v1_todo_proto_msgTypes[22]
+	mi := &file_todo_v1_todo_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1228,7 +1288,7 @@ func (x *AddListMemberResponse) String() string {
 func (*AddListMemberResponse) ProtoMessage() {}
 
 func (x *AddListMemberResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[22]
+	mi := &file_todo_v1_todo_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1241,7 +1301,7 @@ func (x *AddListMemberResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddListMemberResponse.ProtoReflect.Descriptor instead.
 func (*AddListMemberResponse) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{22}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *AddListMemberResponse) GetMember() *ListMember {
@@ -1262,7 +1322,7 @@ type RemoveListMemberRequest struct {
 
 func (x *RemoveListMemberRequest) Reset() {
 	*x = RemoveListMemberRequest{}
-	mi := &file_todo_v1_todo_proto_msgTypes[23]
+	mi := &file_todo_v1_todo_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1274,7 +1334,7 @@ func (x *RemoveListMemberRequest) String() string {
 func (*RemoveListMemberRequest) ProtoMessage() {}
 
 func (x *RemoveListMemberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[23]
+	mi := &file_todo_v1_todo_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1287,7 +1347,7 @@ func (x *RemoveListMemberRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveListMemberRequest.ProtoReflect.Descriptor instead.
 func (*RemoveListMemberRequest) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{23}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *RemoveListMemberRequest) GetListId() string {
@@ -1319,7 +1379,7 @@ type RemoveListMemberResponse struct {
 
 func (x *RemoveListMemberResponse) Reset() {
 	*x = RemoveListMemberResponse{}
-	mi := &file_todo_v1_todo_proto_msgTypes[24]
+	mi := &file_todo_v1_todo_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1331,7 +1391,7 @@ func (x *RemoveListMemberResponse) String() string {
 func (*RemoveListMemberResponse) ProtoMessage() {}
 
 func (x *RemoveListMemberResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[24]
+	mi := &file_todo_v1_todo_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1344,7 +1404,7 @@ func (x *RemoveListMemberResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveListMemberResponse.ProtoReflect.Descriptor instead.
 func (*RemoveListMemberResponse) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{24}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{25}
 }
 
 type GetListMembersRequest struct {
@@ -1357,7 +1417,7 @@ type GetListMembersRequest struct {
 
 func (x *GetListMembersRequest) Reset() {
 	*x = GetListMembersRequest{}
-	mi := &file_todo_v1_todo_proto_msgTypes[25]
+	mi := &file_todo_v1_todo_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1369,7 +1429,7 @@ func (x *GetListMembersRequest) String() string {
 func (*GetListMembersRequest) ProtoMessage() {}
 
 func (x *GetListMembersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[25]
+	mi := &file_todo_v1_todo_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1382,7 +1442,7 @@ func (x *GetListMembersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetListMembersRequest.ProtoReflect.Descriptor instead.
 func (*GetListMembersRequest) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{25}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *GetListMembersRequest) GetListId() string {
@@ -1408,7 +1468,7 @@ type GetListMembersResponse struct {
 
 func (x *GetListMembersResponse) Reset() {
 	*x = GetListMembersResponse{}
-	mi := &file_todo_v1_todo_proto_msgTypes[26]
+	mi := &file_todo_v1_todo_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1420,7 +1480,7 @@ func (x *GetListMembersResponse) String() string {
 func (*GetListMembersResponse) ProtoMessage() {}
 
 func (x *GetListMembersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_v1_todo_proto_msgTypes[26]
+	mi := &file_todo_v1_todo_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1433,7 +1493,7 @@ func (x *GetListMembersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetListMembersResponse.ProtoReflect.Descriptor instead.
 func (*GetListMembersResponse) Descriptor() ([]byte, []int) {
-	return file_todo_v1_todo_proto_rawDescGZIP(), []int{26}
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *GetListMembersResponse) GetMembers() []*ListMember {
@@ -1505,10 +1565,11 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"@\n" +
 	"\x1bToggleItemCompletedResponse\x12!\n" +
-	"\x04item\x18\x01 \x01(\v2\r.todo.v1.ItemR\x04item\"<\n" +
+	"\x04item\x18\x01 \x01(\v2\r.todo.v1.ItemR\x04item\"U\n" +
 	"\x11DeleteItemRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"\x14\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x17\n" +
+	"\alist_id\x18\x03 \x01(\tR\x06listId\"\x14\n" +
 	"\x12DeleteItemResponse\"r\n" +
 	"\x10ListCreatedEvent\x12!\n" +
 	"\x04list\x18\x01 \x01(\v2\r.todo.v1.ListR\x04list\x12;\n" +
@@ -1517,7 +1578,10 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\x12ItemCompletedEvent\x12!\n" +
 	"\x04item\x18\x01 \x01(\v2\r.todo.v1.ItemR\x04item\x12;\n" +
 	"\voccurred_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"occurredAt\"\x86\x01\n" +
+	"occurredAt\"D\n" +
+	"\x10ItemDeletedEvent\x12\x17\n" +
+	"\alist_id\x18\x01 \x01(\tR\x06listId\x12\x17\n" +
+	"\aitem_id\x18\x02 \x01(\tR\x06itemId\"\x86\x01\n" +
 	"\n" +
 	"ListMember\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
@@ -1553,7 +1617,7 @@ func file_todo_v1_todo_proto_rawDescGZIP() []byte {
 	return file_todo_v1_todo_proto_rawDescData
 }
 
-var file_todo_v1_todo_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_todo_v1_todo_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_todo_v1_todo_proto_goTypes = []any{
 	(*List)(nil),                        // 0: todo.v1.List
 	(*Item)(nil),                        // 1: todo.v1.Item
@@ -1575,20 +1639,21 @@ var file_todo_v1_todo_proto_goTypes = []any{
 	(*DeleteItemResponse)(nil),          // 17: todo.v1.DeleteItemResponse
 	(*ListCreatedEvent)(nil),            // 18: todo.v1.ListCreatedEvent
 	(*ItemCompletedEvent)(nil),          // 19: todo.v1.ItemCompletedEvent
-	(*ListMember)(nil),                  // 20: todo.v1.ListMember
-	(*AddListMemberRequest)(nil),        // 21: todo.v1.AddListMemberRequest
-	(*AddListMemberResponse)(nil),       // 22: todo.v1.AddListMemberResponse
-	(*RemoveListMemberRequest)(nil),     // 23: todo.v1.RemoveListMemberRequest
-	(*RemoveListMemberResponse)(nil),    // 24: todo.v1.RemoveListMemberResponse
-	(*GetListMembersRequest)(nil),       // 25: todo.v1.GetListMembersRequest
-	(*GetListMembersResponse)(nil),      // 26: todo.v1.GetListMembersResponse
-	(*timestamppb.Timestamp)(nil),       // 27: google.protobuf.Timestamp
+	(*ItemDeletedEvent)(nil),            // 20: todo.v1.ItemDeletedEvent
+	(*ListMember)(nil),                  // 21: todo.v1.ListMember
+	(*AddListMemberRequest)(nil),        // 22: todo.v1.AddListMemberRequest
+	(*AddListMemberResponse)(nil),       // 23: todo.v1.AddListMemberResponse
+	(*RemoveListMemberRequest)(nil),     // 24: todo.v1.RemoveListMemberRequest
+	(*RemoveListMemberResponse)(nil),    // 25: todo.v1.RemoveListMemberResponse
+	(*GetListMembersRequest)(nil),       // 26: todo.v1.GetListMembersRequest
+	(*GetListMembersResponse)(nil),      // 27: todo.v1.GetListMembersResponse
+	(*timestamppb.Timestamp)(nil),       // 28: google.protobuf.Timestamp
 }
 var file_todo_v1_todo_proto_depIdxs = []int32{
-	27, // 0: todo.v1.List.created_at:type_name -> google.protobuf.Timestamp
-	27, // 1: todo.v1.List.updated_at:type_name -> google.protobuf.Timestamp
-	27, // 2: todo.v1.Item.created_at:type_name -> google.protobuf.Timestamp
-	27, // 3: todo.v1.Item.updated_at:type_name -> google.protobuf.Timestamp
+	28, // 0: todo.v1.List.created_at:type_name -> google.protobuf.Timestamp
+	28, // 1: todo.v1.List.updated_at:type_name -> google.protobuf.Timestamp
+	28, // 2: todo.v1.Item.created_at:type_name -> google.protobuf.Timestamp
+	28, // 3: todo.v1.Item.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 4: todo.v1.CreateListResponse.list:type_name -> todo.v1.List
 	0,  // 5: todo.v1.GetListsByUserResponse.lists:type_name -> todo.v1.List
 	0,  // 6: todo.v1.UpdateListTitleResponse.list:type_name -> todo.v1.List
@@ -1596,12 +1661,12 @@ var file_todo_v1_todo_proto_depIdxs = []int32{
 	1,  // 8: todo.v1.GetAllItemsFromListResponse.items:type_name -> todo.v1.Item
 	1,  // 9: todo.v1.ToggleItemCompletedResponse.item:type_name -> todo.v1.Item
 	0,  // 10: todo.v1.ListCreatedEvent.list:type_name -> todo.v1.List
-	27, // 11: todo.v1.ListCreatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	28, // 11: todo.v1.ListCreatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
 	1,  // 12: todo.v1.ItemCompletedEvent.item:type_name -> todo.v1.Item
-	27, // 13: todo.v1.ItemCompletedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	27, // 14: todo.v1.ListMember.added_at:type_name -> google.protobuf.Timestamp
-	20, // 15: todo.v1.AddListMemberResponse.member:type_name -> todo.v1.ListMember
-	20, // 16: todo.v1.GetListMembersResponse.members:type_name -> todo.v1.ListMember
+	28, // 13: todo.v1.ItemCompletedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	28, // 14: todo.v1.ListMember.added_at:type_name -> google.protobuf.Timestamp
+	21, // 15: todo.v1.AddListMemberResponse.member:type_name -> todo.v1.ListMember
+	21, // 16: todo.v1.GetListMembersResponse.members:type_name -> todo.v1.ListMember
 	17, // [17:17] is the sub-list for method output_type
 	17, // [17:17] is the sub-list for method input_type
 	17, // [17:17] is the sub-list for extension type_name
@@ -1620,7 +1685,7 @@ func file_todo_v1_todo_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_todo_v1_todo_proto_rawDesc), len(file_todo_v1_todo_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   27,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
