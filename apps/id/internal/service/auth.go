@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/terjelafton/platform/apps/id/internal/db"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -91,4 +92,13 @@ func (s *Service) Login(ctx context.Context, email, password string) (*db.IDUser
 
 	s.logger.Info("user logged in", "user_id", user.ID, "email", email)
 	return &user, token, nil
+}
+
+func (s *Service) GetUser(ctx context.Context, userID uuid.UUID) (*db.IDUser, error) {
+	user, err := s.queries.GetUserByID(ctx, userID)
+	if err != nil {
+		s.logger.Error("failed to get user", "error", err, "user_id", userID)
+		return nil, fmt.Errorf("internal error")
+	}
+	return &user, nil
 }
