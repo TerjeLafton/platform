@@ -5,10 +5,22 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+type IDUser struct {
+	ID                uuid.UUID      `json:"id"`
+	Email             string         `json:"email"`
+	PasswordHash      string         `json:"password_hash"`
+	Name              string         `json:"name"`
+	Avatar            []byte         `json:"avatar"`
+	AvatarContentType sql.NullString `json:"avatar_content_type"`
+	CreatedAt         time.Time      `json:"created_at"`
+	UpdatedAt         time.Time      `json:"updated_at"`
+}
 
 type TodoItem struct {
 	ID        uuid.UUID `json:"id"`
@@ -25,4 +37,12 @@ type TodoList struct {
 	Title     string    `json:"title"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type TodoListMember struct {
+	ListID    uuid.UUID `json:"list_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
 }

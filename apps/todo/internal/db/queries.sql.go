@@ -12,12 +12,46 @@ import (
 	"github.com/google/uuid"
 )
 
+const addListMember = `-- name: AddListMember :one
+
+INSERT INTO todo.list_members (list_id, user_id, name, email)
+VALUES ($1, $2, $3, $4)
+RETURNING list_id, user_id, name, email, created_at
+`
+
+type AddListMemberParams struct {
+	ListID uuid.UUID `json:"list_id"`
+	UserID uuid.UUID `json:"user_id"`
+	Name   string    `json:"name"`
+	Email  string    `json:"email"`
+}
+
+// MEMBERS
+func (q *Queries) AddListMember(ctx context.Context, arg AddListMemberParams) (TodoListMember, error) {
+	row := q.db.QueryRowContext(ctx, addListMember,
+		arg.ListID,
+		arg.UserID,
+		arg.Name,
+		arg.Email,
+	)
+	var i TodoListMember
+	err := row.Scan(
+		&i.ListID,
+		&i.UserID,
+		&i.Name,
+		&i.Email,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createItem = `-- name: CreateItem :one
 
 INSERT INTO todo.items (list_id, title)
 SELECT $1, $2
-FROM todo.lists
-WHERE id = $1 AND user_id = $3
+FROM todo.lists l
+WHERE l.id = $1
+  AND (l.user_id = $3 OR EXISTS (SELECT 1 FROM todo.list_members lm WHERE lm.list_id = l.id AND lm.user_id = $3))
 RETURNING id, list_id, title, completed, created_at, updated_at
 `
 
@@ -71,7 +105,8 @@ func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (TodoLis
 const deleteItem = `-- name: DeleteItem :one
 DELETE FROM todo.items i
 USING todo.lists l
-WHERE i.id = $1 AND i.list_id = l.id AND l.user_id = $2
+WHERE i.id = $1 AND i.list_id = l.id
+  AND (l.user_id = $2 OR EXISTS (SELECT 1 FROM todo.list_members lm WHERE lm.list_id = l.id AND lm.user_id = $2))
 RETURNING i.id
 `
 
@@ -108,7 +143,8 @@ func (q *Queries) DeleteList(ctx context.Context, arg DeleteListParams) (uuid.UU
 const getAllItemsFromList = `-- name: GetAllItemsFromList :many
 SELECT i.id, i.list_id, i.title, i.completed, i.created_at, i.updated_at FROM todo.items i
 INNER JOIN todo.lists l ON i.list_id = l.id
-WHERE i.list_id = $1 AND l.user_id = $2
+WHERE i.list_id = $1
+  AND (l.user_id = $2 OR EXISTS (SELECT 1 FROM todo.list_members lm WHERE lm.list_id = l.id AND lm.user_id = $2))
 ORDER BY i.created_at
 `
 
@@ -147,15 +183,66 @@ func (q *Queries) GetAllItemsFromList(ctx context.Context, arg GetAllItemsFromLi
 	return items, nil
 }
 
+const getListMembers = `-- name: GetListMembers :many
+SELECT list_id, user_id, name, email, created_at FROM todo.list_members
+WHERE list_id = $1
+ORDER BY created_at
+`
+
+func (q *Queries) GetListMembers(ctx context.Context, listID uuid.UUID) ([]TodoListMember, error) {
+	rows, err := q.db.QueryContext(ctx, getListMembers, listID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TodoListMember{}
+	for rows.Next() {
+		var i TodoListMember
+		if err := rows.Scan(
+			&i.ListID,
+			&i.UserID,
+			&i.Name,
+			&i.Email,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getListOwner = `-- name: GetListOwner :one
+SELECT user_id FROM todo.lists
+WHERE id = $1
+`
+
+func (q *Queries) GetListOwner(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getListOwner, id)
+	var user_id uuid.UUID
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
 const getListsByUser = `-- name: GetListsByUser :many
 SELECT
   l.id, l.user_id, l.title, l.created_at, l.updated_at,
   COUNT(i.id)::int AS total_items,
-  COUNT(i.id) FILTER (WHERE i.completed)::int AS completed_items
+  COUNT(i.id) FILTER (WHERE i.completed)::int AS completed_items,
+  COALESCE(owner.name, '') AS owner_name,
+  (l.user_id = $1) AS is_owner
 FROM todo.lists l
 LEFT JOIN todo.items i ON i.list_id = l.id
+LEFT JOIN id.users owner ON owner.id = l.user_id
 WHERE l.user_id = $1
-GROUP BY l.id
+   OR EXISTS (SELECT 1 FROM todo.list_members lm WHERE lm.list_id = l.id AND lm.user_id = $1)
+GROUP BY l.id, owner.name
 ORDER BY l.title
 `
 
@@ -167,6 +254,8 @@ type GetListsByUserRow struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 	TotalItems     int32     `json:"total_items"`
 	CompletedItems int32     `json:"completed_items"`
+	OwnerName      string    `json:"owner_name"`
+	IsOwner        bool      `json:"is_owner"`
 }
 
 func (q *Queries) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]GetListsByUserRow, error) {
@@ -186,6 +275,8 @@ func (q *Queries) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]GetLi
 			&i.UpdatedAt,
 			&i.TotalItems,
 			&i.CompletedItems,
+			&i.OwnerName,
+			&i.IsOwner,
 		); err != nil {
 			return nil, err
 		}
@@ -200,13 +291,48 @@ func (q *Queries) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]GetLi
 	return items, nil
 }
 
+const isListMember = `-- name: IsListMember :one
+SELECT EXISTS(
+    SELECT 1 FROM todo.list_members
+    WHERE list_id = $1 AND user_id = $2
+) AS is_member
+`
+
+type IsListMemberParams struct {
+	ListID uuid.UUID `json:"list_id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) IsListMember(ctx context.Context, arg IsListMemberParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, isListMember, arg.ListID, arg.UserID)
+	var is_member bool
+	err := row.Scan(&is_member)
+	return is_member, err
+}
+
+const removeListMember = `-- name: RemoveListMember :exec
+DELETE FROM todo.list_members
+WHERE list_id = $1 AND user_id = $2
+`
+
+type RemoveListMemberParams struct {
+	ListID uuid.UUID `json:"list_id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) RemoveListMember(ctx context.Context, arg RemoveListMemberParams) error {
+	_, err := q.db.ExecContext(ctx, removeListMember, arg.ListID, arg.UserID)
+	return err
+}
+
 const toggleItemCompleted = `-- name: ToggleItemCompleted :one
 UPDATE todo.items i
 SET
     completed = NOT completed,
     updated_at = NOW()
 FROM todo.lists l
-WHERE i.id = $1 AND i.list_id = l.id AND l.user_id = $2
+WHERE i.id = $1 AND i.list_id = l.id
+  AND (l.user_id = $2 OR EXISTS (SELECT 1 FROM todo.list_members lm WHERE lm.list_id = l.id AND lm.user_id = $2))
 RETURNING i.id, i.list_id, i.title, i.completed, i.created_at, i.updated_at
 `
 

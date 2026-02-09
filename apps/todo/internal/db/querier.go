@@ -11,6 +11,8 @@ import (
 )
 
 type Querier interface {
+	// MEMBERS
+	AddListMember(ctx context.Context, arg AddListMemberParams) (TodoListMember, error)
 	// ITEMS
 	CreateItem(ctx context.Context, arg CreateItemParams) (TodoItem, error)
 	// LISTS
@@ -18,7 +20,11 @@ type Querier interface {
 	DeleteItem(ctx context.Context, arg DeleteItemParams) (uuid.UUID, error)
 	DeleteList(ctx context.Context, arg DeleteListParams) (uuid.UUID, error)
 	GetAllItemsFromList(ctx context.Context, arg GetAllItemsFromListParams) ([]TodoItem, error)
+	GetListMembers(ctx context.Context, listID uuid.UUID) ([]TodoListMember, error)
+	GetListOwner(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	GetListsByUser(ctx context.Context, userID uuid.UUID) ([]GetListsByUserRow, error)
+	IsListMember(ctx context.Context, arg IsListMemberParams) (bool, error)
+	RemoveListMember(ctx context.Context, arg RemoveListMemberParams) error
 	ToggleItemCompleted(ctx context.Context, arg ToggleItemCompletedParams) (TodoItem, error)
 	UpdateListTitle(ctx context.Context, arg UpdateListTitleParams) (TodoList, error)
 }

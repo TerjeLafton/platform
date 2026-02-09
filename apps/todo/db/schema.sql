@@ -23,3 +23,14 @@ CREATE TABLE todo.items (
 );
 
 CREATE INDEX idx_items_list_id ON todo.items (list_id);
+
+CREATE TABLE todo.list_members (
+    list_id UUID NOT NULL REFERENCES todo.lists(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (list_id, user_id)
+);
+
+CREATE INDEX idx_list_members_user_id ON todo.list_members(user_id);
