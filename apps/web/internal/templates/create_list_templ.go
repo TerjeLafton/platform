@@ -101,7 +101,7 @@ func CreateListPage(userID string, templateList []*todov1.Template) templ.Compon
 						var templ_7745c5c3_Var5 string
 						templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(t.Id)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/create_list.templ`, Line: 41, Col: 28}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/create_list.templ`, Line: 41, Col: 28}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 						if templ_7745c5c3_Err != nil {
@@ -114,7 +114,7 @@ func CreateListPage(userID string, templateList []*todov1.Template) templ.Compon
 						var templ_7745c5c3_Var6 string
 						templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(t.Title)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/create_list.templ`, Line: 41, Col: 40}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/create_list.templ`, Line: 41, Col: 40}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 						if templ_7745c5c3_Err != nil {
