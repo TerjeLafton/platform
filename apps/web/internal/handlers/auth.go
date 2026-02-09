@@ -44,10 +44,17 @@ func HandleRegisterPage(w http.ResponseWriter, r *http.Request) {
 
 func HandleRegister(nc *nats.Conn, cookieName string, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		name := r.FormValue("name")
 		email := r.FormValue("email")
 		password := r.FormValue("password")
+		passwordConfirm := r.FormValue("password_confirm")
 
-		token, err := natsclient.Register(nc, email, password)
+		if password != passwordConfirm {
+			templates.RegisterPage("Passwords do not match").Render(r.Context(), w)
+			return
+		}
+
+		token, err := natsclient.Register(nc, email, password, name)
 		if err != nil {
 			logger.Warn("registration failed", "email", email, "error", err)
 			templates.RegisterPage(err.Error()).Render(r.Context(), w)

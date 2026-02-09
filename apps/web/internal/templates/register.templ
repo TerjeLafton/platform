@@ -9,11 +9,17 @@ templ RegisterPage(errorMsg string) {
 				<h1 class="mb-6 text-2xl font-bold">Register</h1>
 				@ui.AlertError(errorMsg)
 				<form method="POST" action="/register">
+					@ui.FormField("Name") {
+						@ui.Input("text", "name", "Your name", true)
+					}
 					@ui.FormField("Email") {
 						@ui.Input("email", "email", "you@example.com", true)
 					}
 					@ui.FormField("Password") {
-						@ui.Input("password", "password", "Password", true)
+						@ui.Input("password", "password", "Password (min 8 characters)", true)
+					}
+					@ui.FormField("Confirm Password") {
+						@ui.Input("password", "password_confirm", "Confirm your password", true)
 					}
 					@ui.Button("Register")
 				</form>
