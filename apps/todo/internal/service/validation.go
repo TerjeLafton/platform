@@ -32,6 +32,10 @@ var (
 		Field:   "user_id",
 		Message: "Only the list owner can do this",
 	}
+	ErrNotTemplateOwner = &ValidationError{
+		Field:   "user_id",
+		Message: "Only the template owner can do this",
+	}
 	ErrNotListMember = &ValidationError{
 		Field:   "user_id",
 		Message: "You are not a member of this list",
@@ -49,7 +53,15 @@ func (e *ValidationError) Error() string {
 func translateDBError(err error) error {
 	errStr := err.Error()
 
-	// PostgreSQL unique constraint violation
+	// PostgreSQL unique constraint violation (templates)
+	if strings.Contains(errStr, "templates_user_id_title_key") {
+		return &ValidationError{
+			Field:   "title",
+			Message: "You already have a template with this title",
+		}
+	}
+
+	// PostgreSQL unique constraint violation (lists)
 	if strings.Contains(errStr, "duplicate key") && strings.Contains(errStr, "user_id") {
 		return &ValidationError{
 			Field:   "title",
@@ -58,6 +70,18 @@ func translateDBError(err error) error {
 	}
 
 	// PostgreSQL CHECK constraint violations
+	if strings.Contains(errStr, "templates_title_check") {
+		return &ValidationError{
+			Field:   "title",
+			Message: "Title is invalid (must be 1-100 characters)",
+		}
+	}
+	if strings.Contains(errStr, "template_items_title_check") {
+		return &ValidationError{
+			Field:   "title",
+			Message: "Title is invalid (must be 1-500 characters)",
+		}
+	}
 	if strings.Contains(errStr, "lists_title_check") {
 		return &ValidationError{
 			Field:   "title",
