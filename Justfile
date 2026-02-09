@@ -16,6 +16,10 @@ generate: generate-proto
   @echo "Generating sqlc..."
   cd apps/todo && sqlc generate
   cd apps/id && sqlc generate
+  @echo "Generating templ..."
+  cd apps/web && templ generate
+  @echo "Generating CSS..."
+  cd apps/web && tailwindcss -i static/css/input.css -o static/css/style.css --minify
   @echo "Done!"
 
 migrate-diff:
