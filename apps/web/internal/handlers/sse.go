@@ -113,8 +113,8 @@ func renderEventHTML(ctx context.Context, eventType string, data []byte) (string
 			return "", fmt.Errorf("unmarshal item: %w", err)
 		}
 		var buf bytes.Buffer
-		if err := templates.ItemRow(&item).Render(ctx, &buf); err != nil {
-			return "", fmt.Errorf("render item row: %w", err)
+		if err := templates.ItemRowOOB(&item).Render(ctx, &buf); err != nil {
+			return "", fmt.Errorf("render item row oob: %w", err)
 		}
 		return buf.String(), nil
 

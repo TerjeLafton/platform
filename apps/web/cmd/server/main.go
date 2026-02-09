@@ -13,6 +13,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/terjelafton/platform/apps/web/internal/handlers"
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
+	"github.com/terjelafton/platform/apps/web/internal/sse"
 )
 
 func main() {
@@ -32,6 +33,7 @@ func main() {
 
 	handlerLogger := logger.With("module", "handler")
 	mwLogger := logger.With("module", "middleware")
+	sseManager := sse.NewManager()
 
 	cookieName := "auth_token"
 	requireAuth := middleware.RequireAuth(nc, cookieName, mwLogger)
@@ -59,9 +61,10 @@ func main() {
 	mux.Handle("GET /todo/{id}/settings", requireAuth(handlers.HandleListSettings(nc, handlerLogger)))
 	mux.Handle("DELETE /todo/{id}", requireAuth(handlers.HandleDeleteList(nc, handlerLogger)))
 	mux.Handle("POST /todo/{id}/title", requireAuth(handlers.HandleUpdateListTitle(nc, handlerLogger)))
-	mux.Handle("POST /todo/{id}/items", requireAuth(handlers.HandleCreateItem(nc, handlerLogger)))
-	mux.Handle("POST /todo/items/{id}/toggle", requireAuth(handlers.HandleToggleItem(nc, handlerLogger)))
-	mux.Handle("DELETE /todo/items/{id}", requireAuth(handlers.HandleDeleteItem(nc, handlerLogger)))
+	mux.Handle("POST /todo/{id}/items", requireAuth(handlers.HandleCreateItem(nc, sseManager, handlerLogger)))
+	mux.Handle("POST /todo/items/{id}/toggle", requireAuth(handlers.HandleToggleItem(nc, sseManager, handlerLogger)))
+	mux.Handle("DELETE /todo/items/{id}", requireAuth(handlers.HandleDeleteItem(nc, sseManager, handlerLogger)))
+	mux.Handle("GET /todo/{id}/events", requireAuth(handlers.HandleSSE(nc, sseManager, handlerLogger)))
 	mux.Handle("POST /todo/{id}/members", requireAuth(handlers.HandleAddListMember(nc, handlerLogger)))
 	mux.Handle("DELETE /todo/{id}/members/{memberID}", requireAuth(handlers.HandleRemoveListMember(nc, handlerLogger)))
 	mux.Handle("POST /todo/{id}/leave", requireAuth(handlers.HandleLeaveList(nc, handlerLogger)))

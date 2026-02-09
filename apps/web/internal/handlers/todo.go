@@ -5,9 +5,11 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
 	"github.com/terjelafton/platform/apps/web/internal/natsclient"
+	"github.com/terjelafton/platform/apps/web/internal/sse"
 	"github.com/terjelafton/platform/apps/web/internal/templates"
 )
 
@@ -144,13 +146,16 @@ func HandleUpdateListTitle(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc 
 	}
 }
 
-func HandleCreateItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
+func HandleCreateItem(nc *nats.Conn, sseManager *sse.Manager, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		listID := r.PathValue("id")
 		title := r.FormValue("title")
 
-		item, err := natsclient.CreateItem(nc, listID, userID, title)
+		correlationID := uuid.New().String()
+		sseManager.AddCorrelationID(userID, correlationID)
+
+		item, err := natsclient.CreateItem(nc, listID, userID, title, correlationID)
 		if err != nil {
 			logger.Warn("failed to create item", "error", err, "user_id", userID, "list_id", listID)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -161,12 +166,15 @@ func HandleCreateItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	}
 }
 
-func HandleToggleItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
+func HandleToggleItem(nc *nats.Conn, sseManager *sse.Manager, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
 
-		item, err := natsclient.ToggleItemCompleted(nc, id, userID)
+		correlationID := uuid.New().String()
+		sseManager.AddCorrelationID(userID, correlationID)
+
+		item, err := natsclient.ToggleItemCompleted(nc, id, userID, correlationID)
 		if err != nil {
 			logger.Warn("failed to toggle item", "error", err, "user_id", userID, "item_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -177,12 +185,16 @@ func HandleToggleItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	}
 }
 
-func HandleDeleteItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
+func HandleDeleteItem(nc *nats.Conn, sseManager *sse.Manager, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
+		listID := r.URL.Query().Get("list_id")
 
-		err := natsclient.DeleteItem(nc, id, userID)
+		correlationID := uuid.New().String()
+		sseManager.AddCorrelationID(userID, correlationID)
+
+		err := natsclient.DeleteItem(nc, id, userID, listID, correlationID)
 		if err != nil {
 			logger.Warn("failed to delete item", "error", err, "user_id", userID, "item_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)

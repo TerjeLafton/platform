@@ -50,10 +50,12 @@ templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 				/>
 				@ui.Button("Add Item")
 			</form>
-			<div id="items-list" class="space-y-2">
-				for _, item := range items {
-					@ItemRow(item)
-				}
+			<div hx-ext="sse" sse-connect={ fmt.Sprintf("/todo/%s/events", list.Id) }>
+				<div id="items-list" class="space-y-2" sse-swap="item.created" hx-swap="beforeend">
+					for _, item := range items {
+						@ItemRow(item)
+					}
+				</div>
 			</div>
 			if len(items) == 0 {
 				<p id="empty-state" class="py-8 text-center text-text-muted">No items yet. Add one above!</p>
@@ -83,7 +85,38 @@ templ ItemRow(item *todov1.Item) {
 			{ item.Title }
 		</span>
 		<button
-			hx-delete={ fmt.Sprintf("/todo/items/%s", item.Id) }
+			hx-delete={ fmt.Sprintf("/todo/items/%s?list_id=%s", item.Id, item.ListId) }
+			hx-target={ fmt.Sprintf("#item-%s", item.Id) }
+			hx-swap="outerHTML"
+			class="text-sm text-delete hover:text-delete-hover cursor-pointer"
+		>
+			Delete
+		</button>
+	</div>
+}
+
+templ ItemRowOOB(item *todov1.Item) {
+	<div id={ fmt.Sprintf("item-%s", item.Id) } hx-swap-oob="outerHTML" class="flex items-center gap-3 rounded border border-border-subtle bg-surface px-4 py-3">
+		<input
+			type="checkbox"
+			if item.Completed {
+				checked
+			}
+			hx-post={ fmt.Sprintf("/todo/items/%s/toggle", item.Id) }
+			hx-target={ fmt.Sprintf("#item-%s", item.Id) }
+			hx-swap="outerHTML"
+			class="h-4 w-4 cursor-pointer accent-brand"
+		/>
+		<span
+			class={
+				"flex-1",
+				templ.KV("line-through text-completed", item.Completed),
+			}
+		>
+			{ item.Title }
+		</span>
+		<button
+			hx-delete={ fmt.Sprintf("/todo/items/%s?list_id=%s", item.Id, item.ListId) }
 			hx-target={ fmt.Sprintf("#item-%s", item.Id) }
 			hx-swap="outerHTML"
 			class="text-sm text-delete hover:text-delete-hover cursor-pointer"

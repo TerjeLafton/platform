@@ -116,7 +116,7 @@ func DeleteList(nc *nats.Conn, id, userID string) error {
 	return nil
 }
 
-func CreateItem(nc *nats.Conn, listID, userID, title string) (*todov1.Item, error) {
+func CreateItem(nc *nats.Conn, listID, userID, title, correlationID string) (*todov1.Item, error) {
 	req := &todov1.CreateItemRequest{
 		ListId: listID,
 		UserId: userID,
@@ -128,7 +128,14 @@ func CreateItem(nc *nats.Conn, listID, userID, title string) (*todov1.Item, erro
 		return nil, fmt.Errorf("marshal create item request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.item.create", data, requestTimeout)
+	natsMsg := &nats.Msg{
+		Subject: "todo.item.create",
+		Data:    data,
+		Header:  nats.Header{},
+	}
+	natsMsg.Header.Set("X-Correlation-ID", correlationID)
+
+	msg, err := nc.RequestMsg(natsMsg, requestTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -173,7 +180,7 @@ func GetAllItemsFromList(nc *nats.Conn, listID, userID string) ([]*todov1.Item, 
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func ToggleItemCompleted(nc *nats.Conn, id, userID string) (*todov1.Item, error) {
+func ToggleItemCompleted(nc *nats.Conn, id, userID, correlationID string) (*todov1.Item, error) {
 	req := &todov1.ToggleItemCompletedRequest{
 		Id:     id,
 		UserId: userID,
@@ -184,7 +191,14 @@ func ToggleItemCompleted(nc *nats.Conn, id, userID string) (*todov1.Item, error)
 		return nil, fmt.Errorf("marshal toggle item request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.item.toggle_completed", data, requestTimeout)
+	natsMsg := &nats.Msg{
+		Subject: "todo.item.toggle_completed",
+		Data:    data,
+		Header:  nats.Header{},
+	}
+	natsMsg.Header.Set("X-Correlation-ID", correlationID)
+
+	msg, err := nc.RequestMsg(natsMsg, requestTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -201,10 +215,11 @@ func ToggleItemCompleted(nc *nats.Conn, id, userID string) (*todov1.Item, error)
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func DeleteItem(nc *nats.Conn, id, userID string) error {
+func DeleteItem(nc *nats.Conn, id, userID, listID, correlationID string) error {
 	req := &todov1.DeleteItemRequest{
 		Id:     id,
 		UserId: userID,
+		ListId: listID,
 	}
 
 	data, err := proto.Marshal(req)
@@ -212,7 +227,14 @@ func DeleteItem(nc *nats.Conn, id, userID string) error {
 		return fmt.Errorf("marshal delete item request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.item.delete", data, requestTimeout)
+	natsMsg := &nats.Msg{
+		Subject: "todo.item.delete",
+		Data:    data,
+		Header:  nats.Header{},
+	}
+	natsMsg.Header.Set("X-Correlation-ID", correlationID)
+
+	msg, err := nc.RequestMsg(natsMsg, requestTimeout)
 	if err != nil {
 		return fmt.Errorf("nats request: %w", err)
 	}
