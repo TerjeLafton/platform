@@ -17,17 +17,11 @@ templ ListsPage(userID string, lists []*todov1.List) {
 		@ui.PageWide() {
 			<div class="mb-8 flex items-center justify-between">
 				<h1 class="text-2xl font-bold">Lists</h1>
+				<div class="flex items-center gap-4">
+					<a href="/todo/templates" class="text-sm text-link hover:underline">Templates</a>
+					<a href="/todo/new" class="rounded bg-brand px-4 py-2 text-sm font-medium text-brand-text hover:bg-brand-hover">New List</a>
+				</div>
 			</div>
-			<form method="POST" action="/todo" class="mb-6 flex gap-2">
-				<input
-					type="text"
-					name="title"
-					placeholder="New list name..."
-					required
-					class="flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted"
-				/>
-				@ui.Button("Create List")
-			</form>
 			if len(lists) == 0 {
 				<p class="py-8 text-center text-text-muted">No lists yet. Create one above!</p>
 			} else {

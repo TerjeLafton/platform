@@ -1,0 +1,63 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/terjelafton/platform/apps/web/internal/templates/ui"
+	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
+)
+
+templ TemplatesPage(userID string, templateList []*todov1.Template) {
+	@Layout("Templates") {
+		@ui.Navbar(userID) {
+			<form method="POST" action="/logout">
+				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
+			</form>
+		}
+		@ui.PageWide() {
+			<div class="mb-6">
+				<a href="/todo" class="text-sm text-link hover:underline">&larr; Back to lists</a>
+			</div>
+			<div class="mb-8 flex items-center justify-between">
+				<h1 class="text-2xl font-bold">Templates</h1>
+			</div>
+			<form method="POST" action="/todo/templates" class="mb-6 flex gap-2">
+				<input
+					type="text"
+					name="title"
+					placeholder="New template name..."
+					required
+					class="flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted"
+				/>
+				@ui.Button("Create Template")
+			</form>
+			if len(templateList) == 0 {
+				<p class="py-8 text-center text-text-muted">No templates yet. Create one above!</p>
+			} else {
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+					for _, t := range templateList {
+						@TemplateCard(t)
+					}
+				</div>
+			}
+		}
+	}
+}
+
+templ TemplateCard(t *todov1.Template) {
+	<div class="group relative rounded-lg border border-border-subtle bg-surface p-5 transition-colors hover:border-border">
+		<a
+			href={ templ.SafeURL(fmt.Sprintf("/todo/templates/%s", t.Id)) }
+			class="font-semibold text-text-primary after:absolute after:inset-0"
+		>
+			{ t.Title }
+		</a>
+		<p class="mt-3 text-sm text-text-muted">
+			if t.ItemCount == 0 {
+				No items
+			} else {
+				{ fmt.Sprintf("%d items", t.ItemCount) }
+			}
+		</p>
+	</div>
+}

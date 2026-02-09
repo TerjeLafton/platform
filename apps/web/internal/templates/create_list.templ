@@ -1,0 +1,50 @@
+package templates
+
+import (
+	"github.com/terjelafton/platform/apps/web/internal/templates/ui"
+	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
+)
+
+templ CreateListPage(userID string, templateList []*todov1.Template) {
+	@Layout("New List") {
+		@ui.Navbar(userID) {
+			<form method="POST" action="/logout">
+				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
+			</form>
+		}
+		@ui.PageNarrow() {
+			<div class="mb-6">
+				<a href="/todo" class="text-sm text-link hover:underline">&larr; Back to lists</a>
+			</div>
+			<h1 class="mb-8 text-2xl font-bold">New List</h1>
+			<form method="POST" action="/todo/new" class="space-y-4">
+				<div>
+					<label for="title" class="mb-1 block text-sm font-medium text-text-secondary">Title</label>
+					<input
+						type="text"
+						id="title"
+						name="title"
+						placeholder="List title..."
+						class="w-full rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted"
+					/>
+				</div>
+				if len(templateList) > 0 {
+					<div>
+						<label for="template_id" class="mb-1 block text-sm font-medium text-text-secondary">Template (optional)</label>
+						<select
+							id="template_id"
+							name="template_id"
+							class="w-full rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none"
+						>
+							<option value="">No template</option>
+							for _, t := range templateList {
+								<option value={ t.Id }>{ t.Title }</option>
+							}
+						</select>
+					</div>
+				}
+				@ui.Button("Create List")
+			</form>
+		}
+	}
+}
