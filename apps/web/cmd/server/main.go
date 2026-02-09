@@ -56,6 +56,7 @@ func main() {
 	mux.Handle("GET /todo/{$}", requireAuth(handlers.HandleListsPage(nc, handlerLogger)))
 	mux.Handle("POST /todo", requireAuth(handlers.HandleCreateList(nc, handlerLogger)))
 	mux.Handle("GET /todo/{id}", requireAuth(handlers.HandleListDetail(nc, handlerLogger)))
+	mux.Handle("GET /todo/{id}/settings", requireAuth(handlers.HandleListSettings(nc, handlerLogger)))
 	mux.Handle("DELETE /todo/{id}", requireAuth(handlers.HandleDeleteList(nc, handlerLogger)))
 	mux.Handle("POST /todo/{id}/title", requireAuth(handlers.HandleUpdateListTitle(nc, handlerLogger)))
 	mux.Handle("POST /todo/{id}/items", requireAuth(handlers.HandleCreateItem(nc, handlerLogger)))

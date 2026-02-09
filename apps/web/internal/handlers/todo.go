@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -8,7 +9,6 @@ import (
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
 	"github.com/terjelafton/platform/apps/web/internal/natsclient"
 	"github.com/terjelafton/platform/apps/web/internal/templates"
-	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
 )
 
 func HandleListsPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
@@ -80,17 +80,7 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 					return
 				}
 
-				var members []*todov1.ListMember
-				if list.IsOwner {
-					members, err = natsclient.GetListMembers(nc, id, userID)
-					if err != nil {
-						logger.Error("failed to get members", "error", err, "user_id", userID, "list_id", id)
-						http.Error(w, "Failed to load members", http.StatusInternalServerError)
-						return
-					}
-				}
-
-				templates.ListDetailPage(userID, list, items, members).Render(r.Context(), w)
+				templates.ListDetailPage(userID, list, items).Render(r.Context(), w)
 				found = true
 				break
 			}
@@ -102,20 +92,55 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	}
 }
 
+func HandleListSettings(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := middleware.UserIDFromContext(r.Context())
+		id := r.PathValue("id")
+
+		lists, err := natsclient.GetListsByUser(nc, userID)
+		if err != nil {
+			logger.Error("failed to get lists", "error", err, "user_id", userID)
+			http.Error(w, "Failed to load list", http.StatusInternalServerError)
+			return
+		}
+
+		for _, list := range lists {
+			if list.Id == id {
+				if !list.IsOwner {
+					http.Redirect(w, r, fmt.Sprintf("/todo/%s", id), http.StatusSeeOther)
+					return
+				}
+
+				members, err := natsclient.GetListMembers(nc, id, userID)
+				if err != nil {
+					logger.Error("failed to get members", "error", err, "user_id", userID, "list_id", id)
+					http.Error(w, "Failed to load members", http.StatusInternalServerError)
+					return
+				}
+
+				templates.ListSettingsPage(userID, list, members).Render(r.Context(), w)
+				return
+			}
+		}
+
+		http.Redirect(w, r, "/todo", http.StatusSeeOther)
+	}
+}
+
 func HandleUpdateListTitle(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
 		title := r.FormValue("title")
 
-		list, err := natsclient.UpdateListTitle(nc, id, userID, title)
+		_, err := natsclient.UpdateListTitle(nc, id, userID, title)
 		if err != nil {
 			logger.Warn("failed to update list title", "error", err, "user_id", userID, "list_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		templates.ListTitle(list).Render(r.Context(), w)
+		http.Redirect(w, r, fmt.Sprintf("/todo/%s/settings", id), http.StatusSeeOther)
 	}
 }
 

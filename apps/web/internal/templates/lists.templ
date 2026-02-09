@@ -51,15 +51,12 @@ templ ListCard(list *todov1.List) {
 				{ list.Title }
 			</a>
 			if list.IsOwner {
-				<button
-					hx-delete={ fmt.Sprintf("/todo/%s", list.Id) }
-					hx-target={ fmt.Sprintf("#list-%s", list.Id) }
-					hx-swap="outerHTML"
-					hx-confirm="Delete this list?"
-					class="relative z-10 text-sm text-text-muted opacity-0 transition-opacity hover:text-delete cursor-pointer group-hover:opacity-100"
+				<a
+					href={ templ.SafeURL(fmt.Sprintf("/todo/%s/settings", list.Id)) }
+					class="relative z-10 text-sm text-text-muted opacity-0 transition-opacity hover:text-text-secondary cursor-pointer group-hover:opacity-100"
 				>
-					Delete
-				</button>
+					Settings
+				</a>
 			} else {
 				<button
 					hx-post={ fmt.Sprintf("/todo/%s/leave", list.Id) }
