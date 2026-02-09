@@ -6,9 +6,15 @@ VALUES ($1, $2)
 RETURNING *;
 
 -- name: GetListsByUser :many
-SELECT * FROM todo.lists
-WHERE user_id = $1
-ORDER BY title;
+SELECT
+  l.id, l.user_id, l.title, l.created_at, l.updated_at,
+  COUNT(i.id)::int AS total_items,
+  COUNT(i.id) FILTER (WHERE i.completed)::int AS completed_items
+FROM todo.lists l
+LEFT JOIN todo.items i ON i.list_id = l.id
+WHERE l.user_id = $1
+GROUP BY l.id
+ORDER BY l.title;
 
 -- name: UpdateListTitle :one
 UPDATE todo.lists

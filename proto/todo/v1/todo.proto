@@ -15,6 +15,8 @@ message List {
   string title = 3;
   google.protobuf.Timestamp created_at = 4;
   google.protobuf.Timestamp updated_at = 5;
+  int32 total_items = 6;
+  int32 completed_items = 7;
 }
 
 message Item {

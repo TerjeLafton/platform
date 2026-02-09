@@ -68,7 +68,7 @@ func (s *Service) publishListCreated(_ context.Context, list db.TodoList) {
 	}
 }
 
-func (s *Service) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]db.TodoList, error) {
+func (s *Service) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]db.GetListsByUserRow, error) {
 	lists, err := s.queries.GetListsByUser(ctx, userID)
 	if err != nil {
 		s.logger.Error("database error", "error", err, "user_id", userID)

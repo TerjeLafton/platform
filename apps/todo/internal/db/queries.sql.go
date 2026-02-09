@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -147,26 +148,44 @@ func (q *Queries) GetAllItemsFromList(ctx context.Context, arg GetAllItemsFromLi
 }
 
 const getListsByUser = `-- name: GetListsByUser :many
-SELECT id, user_id, title, created_at, updated_at FROM todo.lists
-WHERE user_id = $1
-ORDER BY title
+SELECT
+  l.id, l.user_id, l.title, l.created_at, l.updated_at,
+  COUNT(i.id)::int AS total_items,
+  COUNT(i.id) FILTER (WHERE i.completed)::int AS completed_items
+FROM todo.lists l
+LEFT JOIN todo.items i ON i.list_id = l.id
+WHERE l.user_id = $1
+GROUP BY l.id
+ORDER BY l.title
 `
 
-func (q *Queries) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]TodoList, error) {
+type GetListsByUserRow struct {
+	ID             uuid.UUID `json:"id"`
+	UserID         uuid.UUID `json:"user_id"`
+	Title          string    `json:"title"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	TotalItems     int32     `json:"total_items"`
+	CompletedItems int32     `json:"completed_items"`
+}
+
+func (q *Queries) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]GetListsByUserRow, error) {
 	rows, err := q.db.QueryContext(ctx, getListsByUser, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []TodoList{}
+	items := []GetListsByUserRow{}
 	for rows.Next() {
-		var i TodoList
+		var i GetListsByUserRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
 			&i.Title,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.TotalItems,
+			&i.CompletedItems,
 		); err != nil {
 			return nil, err
 		}

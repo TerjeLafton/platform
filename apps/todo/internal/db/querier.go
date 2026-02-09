@@ -18,7 +18,7 @@ type Querier interface {
 	DeleteItem(ctx context.Context, arg DeleteItemParams) (uuid.UUID, error)
 	DeleteList(ctx context.Context, arg DeleteListParams) (uuid.UUID, error)
 	GetAllItemsFromList(ctx context.Context, arg GetAllItemsFromListParams) ([]TodoItem, error)
-	GetListsByUser(ctx context.Context, userID uuid.UUID) ([]TodoList, error)
+	GetListsByUser(ctx context.Context, userID uuid.UUID) ([]GetListsByUserRow, error)
 	ToggleItemCompleted(ctx context.Context, arg ToggleItemCompletedParams) (TodoItem, error)
 	UpdateListTitle(ctx context.Context, arg UpdateListTitleParams) (TodoList, error)
 }

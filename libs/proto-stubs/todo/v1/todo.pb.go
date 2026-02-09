@@ -24,14 +24,16 @@ const (
 )
 
 type List struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Title          string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	TotalItems     int32                  `protobuf:"varint,6,opt,name=total_items,json=totalItems,proto3" json:"total_items,omitempty"`
+	CompletedItems int32                  `protobuf:"varint,7,opt,name=completed_items,json=completedItems,proto3" json:"completed_items,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *List) Reset() {
@@ -97,6 +99,20 @@ func (x *List) GetUpdatedAt() *timestamppb.Timestamp {
 		return x.UpdatedAt
 	}
 	return nil
+}
+
+func (x *List) GetTotalItems() int32 {
+	if x != nil {
+		return x.TotalItems
+	}
+	return 0
+}
+
+func (x *List) GetCompletedItems() int32 {
+	if x != nil {
+		return x.CompletedItems
+	}
+	return 0
 }
 
 type Item struct {
@@ -1051,7 +1067,7 @@ var File_todo_v1_todo_proto protoreflect.FileDescriptor
 
 const file_todo_v1_todo_proto_rawDesc = "" +
 	"\n" +
-	"\x12todo/v1/todo.proto\x12\atodo.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16common/v1/common.proto\"\xbb\x01\n" +
+	"\x12todo/v1/todo.proto\x12\atodo.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16common/v1/common.proto\"\x85\x02\n" +
 	"\x04List\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
@@ -1059,7 +1075,10 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xd9\x01\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x1f\n" +
+	"\vtotal_items\x18\x06 \x01(\x05R\n" +
+	"totalItems\x12'\n" +
+	"\x0fcompleted_items\x18\a \x01(\x05R\x0ecompletedItems\"\xd9\x01\n" +
 	"\x04Item\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\alist_id\x18\x02 \x01(\tR\x06listId\x12\x14\n" +
