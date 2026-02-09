@@ -1,11 +1,14 @@
 package ui
 
-templ Navbar() {
+templ Navbar(userID string) {
 	<nav class="border-b border-border-subtle bg-surface">
 		<div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
 			<a href="/" class="text-lg font-semibold text-text-primary">Platform</a>
 			<div class="flex items-center gap-4">
 				{ children... }
+				<a href="/profile" class="flex items-center">
+					<img src={ "/avatar/" + userID } alt="avatar" class="h-8 w-8 rounded-full object-cover"/>
+				</a>
 			</div>
 		</div>
 	</nav>

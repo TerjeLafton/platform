@@ -21,7 +21,7 @@ func HandleListsPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 			return
 		}
 
-		templates.ListsPage(lists).Render(r.Context(), w)
+		templates.ListsPage(userID, lists).Render(r.Context(), w)
 	}
 }
 
@@ -80,7 +80,7 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 					return
 				}
 
-				templates.ListDetailPage(list, items).Render(r.Context(), w)
+				templates.ListDetailPage(userID, list, items).Render(r.Context(), w)
 				found = true
 				break
 			}

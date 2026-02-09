@@ -4,10 +4,7 @@ import "github.com/terjelafton/platform/apps/web/internal/templates/ui"
 
 templ ProfilePage(userID, name, email, errorMsg string) {
 	@Layout("Profile") {
-		@ui.Navbar() {
-			<a href="/profile" class="flex items-center">
-				<img src={ "/avatar/" + userID } alt="avatar" class="h-8 w-8 rounded-full object-cover"/>
-			</a>
+		@ui.Navbar(userID) {
 			<form method="POST" action="/logout">
 				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
 			</form>

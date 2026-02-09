@@ -7,9 +7,9 @@ import (
 	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
 )
 
-templ ListDetailPage(list *todov1.List, items []*todov1.Item) {
+templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 	@Layout(list.Title) {
-		@ui.Navbar() {
+		@ui.Navbar(userID) {
 			<form method="POST" action="/logout">
 				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
 			</form>
