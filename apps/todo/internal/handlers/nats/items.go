@@ -34,7 +34,9 @@ func (h *Handler) HandleCreateItem(msg *nats.Msg) {
 		return
 	}
 
-	item, err := h.service.CreateItem(context.Background(), listID, userID, req.Title)
+	correlationID := msg.Header.Get("X-Correlation-ID")
+
+	item, err := h.service.CreateItem(context.Background(), listID, userID, req.Title, correlationID)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
 			h.logger.Warn("validation failed", "error", err, "list_id", listID, "user_id", userID)
@@ -126,7 +128,9 @@ func (h *Handler) HandleToggleItemCompleted(msg *nats.Msg) {
 		return
 	}
 
-	item, err := h.service.ToggleItemCompleted(context.Background(), itemID, userID)
+	correlationID := msg.Header.Get("X-Correlation-ID")
+
+	item, err := h.service.ToggleItemCompleted(context.Background(), itemID, userID, correlationID)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
 			h.logger.Warn("toggle failed", "error", valErr.Message, "item_id", itemID, "user_id", userID)
@@ -172,7 +176,16 @@ func (h *Handler) HandleDeleteItem(msg *nats.Msg) {
 		return
 	}
 
-	if err := h.service.DeleteItem(context.Background(), itemID, userID); err != nil {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+
+	listID, err := uuid.Parse(req.ListId)
+	if err != nil {
+		h.logger.Warn("invalid list_id", "subject", msg.Subject, "list_id", req.ListId)
+		h.respondError(msg, "INVALID_REQUEST", "Invalid list ID format")
+		return
+	}
+
+	if err := h.service.DeleteItem(context.Background(), itemID, userID, listID, correlationID); err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
 			h.logger.Warn("delete failed", "error", valErr.Message, "item_id", itemID, "user_id", userID)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)

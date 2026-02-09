@@ -2,11 +2,16 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/nats-io/nats.go"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/terjelafton/platform/apps/todo/internal/db"
+	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
 )
 
 func (s *Service) CreateItem(
@@ -14,6 +19,7 @@ func (s *Service) CreateItem(
 	listID uuid.UUID,
 	userID uuid.UUID,
 	title string,
+	correlationID string,
 ) (*db.TodoItem, error) {
 	title = strings.TrimSpace(title)
 
@@ -36,6 +42,15 @@ func (s *Service) CreateItem(
 	}
 
 	s.logger.Info("item created", "item_id", item.ID, "list_id", listID, "user_id", userID)
+
+	s.publishItemEvent(item.ListID.String(), "item.created", correlationID, &todov1.Item{
+		Id:        item.ID.String(),
+		ListId:    item.ListID.String(),
+		Title:     item.Title,
+		Completed: item.Completed,
+		CreatedAt: timestamppb.New(item.CreatedAt),
+		UpdatedAt: timestamppb.New(item.UpdatedAt),
+	})
 
 	return &item, nil
 }
@@ -63,6 +78,7 @@ func (s *Service) ToggleItemCompleted(
 	ctx context.Context,
 	itemID uuid.UUID,
 	userID uuid.UUID,
+	correlationID string,
 ) (*db.TodoItem, error) {
 	item, err := s.queries.ToggleItemCompleted(ctx, db.ToggleItemCompletedParams{
 		ID:     itemID,
@@ -75,10 +91,19 @@ func (s *Service) ToggleItemCompleted(
 
 	s.logger.Info("item toggled", "item_id", itemID, "user_id", userID, "completed", item.Completed)
 
+	s.publishItemEvent(item.ListID.String(), "item.toggled", correlationID, &todov1.Item{
+		Id:        item.ID.String(),
+		ListId:    item.ListID.String(),
+		Title:     item.Title,
+		Completed: item.Completed,
+		CreatedAt: timestamppb.New(item.CreatedAt),
+		UpdatedAt: timestamppb.New(item.UpdatedAt),
+	})
+
 	return &item, nil
 }
 
-func (s *Service) DeleteItem(ctx context.Context, itemID uuid.UUID, userID uuid.UUID) error {
+func (s *Service) DeleteItem(ctx context.Context, itemID, userID, listID uuid.UUID, correlationID string) error {
 	_, err := s.queries.DeleteItem(ctx, db.DeleteItemParams{
 		ID:     itemID,
 		UserID: userID,
@@ -90,5 +115,33 @@ func (s *Service) DeleteItem(ctx context.Context, itemID uuid.UUID, userID uuid.
 
 	s.logger.Info("item deleted", "item_id", itemID, "user_id", userID)
 
+	s.publishItemEvent(listID.String(), "item.deleted", correlationID, &todov1.ItemDeletedEvent{
+		ListId: listID.String(),
+		ItemId: itemID.String(),
+	})
+
 	return nil
+}
+
+func (s *Service) publishItemEvent(listID, eventType, correlationID string, msg proto.Message) {
+	data, err := proto.Marshal(msg)
+	if err != nil {
+		s.logger.Error("failed to marshal event", "error", err, "list_id", listID, "event_type", eventType)
+		return
+	}
+
+	natsMsg := &nats.Msg{
+		Subject: fmt.Sprintf("todo.events.%s.%s", listID, eventType),
+		Data:    data,
+	}
+	if correlationID != "" {
+		natsMsg.Header = nats.Header{}
+		natsMsg.Header.Set("X-Correlation-ID", correlationID)
+	}
+
+	if err := s.nc.PublishMsg(natsMsg); err != nil {
+		s.logger.Warn("failed to publish event", "error", err, "list_id", listID, "event_type", eventType)
+	} else {
+		s.logger.Info("event published", "subject", natsMsg.Subject, "list_id", listID)
+	}
 }
