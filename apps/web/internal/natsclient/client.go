@@ -51,10 +51,11 @@ func Login(nc *nats.Conn, email, password string) (string, error) {
 	return "", fmt.Errorf("unexpected response from id service")
 }
 
-func Register(nc *nats.Conn, email, password string) (string, error) {
+func Register(nc *nats.Conn, email, password, name string) (string, error) {
 	req := &idv1.RegisterRequest{
 		Email:    email,
 		Password: password,
+		Name:     name,
 	}
 
 	data, err := proto.Marshal(req)
@@ -108,6 +109,85 @@ func ValidateToken(nc *nats.Conn, token string) (string, error) {
 	}
 
 	return "", fmt.Errorf("unexpected response from id service")
+}
+
+func GetUser(nc *nats.Conn, userID string) (*idv1.User, error) {
+	req := &idv1.GetUserRequest{
+		UserId: userID,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal get user request: %w", err)
+	}
+
+	msg, err := nc.Request("id.user.get", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp idv1.GetUserResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil && resp.User != nil {
+		return resp.User, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from id service")
+}
+
+func GetAvatar(nc *nats.Conn, userID string) ([]byte, string, error) {
+	req := &idv1.GetAvatarRequest{
+		UserId: userID,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, "", fmt.Errorf("marshal get avatar request: %w", err)
+	}
+
+	msg, err := nc.Request("id.user.avatar", data, requestTimeout)
+	if err != nil {
+		return nil, "", fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp idv1.GetAvatarResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil && len(resp.Avatar) > 0 {
+		return resp.Avatar, resp.ContentType, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, "", svcErr
+	}
+
+	// No avatar set — return nil (not an error)
+	return nil, "", nil
+}
+
+func UpdateAvatar(nc *nats.Conn, userID string, avatar []byte, contentType string) error {
+	req := &idv1.UpdateAvatarRequest{
+		UserId:      userID,
+		Avatar:      avatar,
+		ContentType: contentType,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshal update avatar request: %w", err)
+	}
+
+	msg, err := nc.Request("id.user.avatar.update", data, requestTimeout)
+	if err != nil {
+		return fmt.Errorf("nats request: %w", err)
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return svcErr
+	}
+
+	return nil
 }
 
 func parseError(data []byte) *ServiceError {
