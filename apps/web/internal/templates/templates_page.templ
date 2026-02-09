@@ -55,6 +55,8 @@ templ TemplateCard(t *todov1.Template) {
 		<p class="mt-3 text-sm text-text-muted">
 			if t.ItemCount == 0 {
 				No items
+			} else if t.ItemCount == 1 {
+				1 item
 			} else {
 				{ fmt.Sprintf("%d items", t.ItemCount) }
 			}

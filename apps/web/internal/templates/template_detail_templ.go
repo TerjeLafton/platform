@@ -133,7 +133,7 @@ func TemplateDetailPage(userID string, t *todov1.Template, items []*todov1.Templ
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-target=\"#template-items-list\" hx-swap=\"beforeend\" hx-on::after-request=\"if(event.detail.successful) this.reset()\" class=\"mb-4 flex gap-2\"><input type=\"text\" name=\"title\" placeholder=\"Add an item...\" required class=\"flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-target=\"#template-items-list\" hx-swap=\"beforeend\" hx-on::after-request=\"if(event.detail.successful){this.reset();var e=document.getElementById('template-items-empty');if(e)e.remove()}\" class=\"mb-4 flex gap-2\"><input type=\"text\" name=\"title\" placeholder=\"Add an item...\" required class=\"flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -151,17 +151,13 @@ func TemplateDetailPage(userID string, t *todov1.Template, items []*todov1.Templ
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
 				if len(items) == 0 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<p class=\"py-4 text-center text-text-muted\">No items yet. Add one above!</p>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<p id=\"template-items-empty\" class=\"py-4 text-center text-text-muted\">No items yet. Add one above!</p>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div> <div class=\"rounded-lg border border-error-border bg-error-bg p-5\"><h2 class=\"mb-2 text-lg font-semibold text-error-text\">Danger Zone</h2><p class=\"mb-4 text-sm text-text-secondary\">Deleting this template will remove it permanently.</p><button hx-delete=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div> <div class=\"rounded-lg border border-error-border bg-error-bg p-5\"><h2 class=\"mb-2 text-lg font-semibold text-error-text\">Danger Zone</h2><p class=\"mb-4 text-sm text-text-secondary\">Deleting this template will remove it permanently.</p><button hx-delete=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -174,7 +170,7 @@ func TemplateDetailPage(userID string, t *todov1.Template, items []*todov1.Templ
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-confirm=\"Are you sure you want to delete this template? This cannot be undone.\" hx-on::after-request=\"if(event.detail.successful) window.location.href='/todo/templates'\" class=\"rounded bg-danger px-4 py-2 text-sm font-medium text-white hover:opacity-90 cursor-pointer\">Delete Template</button></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-confirm=\"Are you sure you want to delete this template? This cannot be undone.\" hx-on::after-request=\"if(event.detail.successful) window.location.href='/todo/templates'\" class=\"rounded bg-danger px-4 py-2 text-sm font-medium text-white hover:opacity-90 cursor-pointer\">Delete Template</button></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -215,7 +211,7 @@ func TemplateItemRow(templateID string, item *todov1.TemplateItem) templ.Compone
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -228,7 +224,7 @@ func TemplateItemRow(templateID string, item *todov1.TemplateItem) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"flex items-center gap-3 rounded border border-border-subtle bg-surface px-4 py-3\"><input type=\"checkbox\" disabled class=\"h-4 w-4 accent-brand opacity-50\"> <span class=\"flex-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" class=\"flex items-center gap-3 rounded border border-border-subtle bg-surface px-4 py-3\"><input type=\"checkbox\" disabled class=\"h-4 w-4 accent-brand opacity-50\"> <span class=\"flex-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -241,7 +237,7 @@ func TemplateItemRow(templateID string, item *todov1.TemplateItem) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span> <button hx-delete=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span> <button hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -254,7 +250,7 @@ func TemplateItemRow(templateID string, item *todov1.TemplateItem) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -267,7 +263,7 @@ func TemplateItemRow(templateID string, item *todov1.TemplateItem) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-swap=\"outerHTML\" class=\"text-sm text-delete hover:text-delete-hover cursor-pointer\">Delete</button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-swap=\"outerHTML\" class=\"text-sm text-delete hover:text-delete-hover cursor-pointer\">Delete</button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

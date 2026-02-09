@@ -44,7 +44,7 @@ templ TemplateDetailPage(userID string, t *todov1.Template, items []*todov1.Temp
 					hx-post={ fmt.Sprintf("/todo/templates/%s/items", t.Id) }
 					hx-target="#template-items-list"
 					hx-swap="beforeend"
-					hx-on::after-request="if(event.detail.successful) this.reset()"
+					hx-on::after-request="if(event.detail.successful){this.reset();var e=document.getElementById('template-items-empty');if(e)e.remove()}"
 					class="mb-4 flex gap-2"
 				>
 					<input
@@ -60,10 +60,10 @@ templ TemplateDetailPage(userID string, t *todov1.Template, items []*todov1.Temp
 					for _, item := range items {
 						@TemplateItemRow(t.Id, item)
 					}
+					if len(items) == 0 {
+						<p id="template-items-empty" class="py-4 text-center text-text-muted">No items yet. Add one above!</p>
+					}
 				</div>
-				if len(items) == 0 {
-					<p class="py-4 text-center text-text-muted">No items yet. Add one above!</p>
-				}
 			</div>
 			// Danger zone
 			<div class="rounded-lg border border-error-border bg-error-bg p-5">
