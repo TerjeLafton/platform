@@ -22,7 +22,7 @@ templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 				<h1 class="text-2xl font-bold">{ list.Title }</h1>
 				if list.IsOwner {
 					<a
-						href={ templ.SafeURL(fmt.Sprintf("/todo/%s/settings", list.Id)) }
+						href={ templ.SafeURL(fmt.Sprintf("/todo/lists/%s/settings", list.Id)) }
 						class="text-sm text-text-muted hover:text-text-secondary"
 					>
 						Settings
@@ -35,7 +35,7 @@ templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 				</p>
 			}
 			<form
-				hx-post={ fmt.Sprintf("/todo/%s/items", list.Id) }
+				hx-post={ fmt.Sprintf("/todo/lists/%s/items", list.Id) }
 				hx-target="#items-list"
 				hx-swap="beforeend"
 				hx-on::after-request="if(event.detail.successful) this.reset()"
@@ -50,7 +50,7 @@ templ ListDetailPage(userID string, list *todov1.List, items []*todov1.Item) {
 				/>
 				@ui.Button("Add Item")
 			</form>
-			<div hx-ext="sse" sse-connect={ fmt.Sprintf("/todo/%s/events", list.Id) }>
+			<div hx-ext="sse" sse-connect={ fmt.Sprintf("/todo/lists/%s/events", list.Id) }>
 				<div id="items-list" class="space-y-2" sse-swap="item.created" hx-swap="beforeend">
 					for _, item := range items {
 						@ItemRow(item)

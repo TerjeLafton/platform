@@ -93,7 +93,7 @@ func HandleListSettings(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 		for _, list := range lists {
 			if list.Id == id {
 				if !list.IsOwner {
-					http.Redirect(w, r, fmt.Sprintf("/todo/%s", id), http.StatusSeeOther)
+					http.Redirect(w, r, fmt.Sprintf("/todo/lists/%s", id), http.StatusSeeOther)
 					return
 				}
 
@@ -126,7 +126,7 @@ func HandleUpdateListTitle(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc 
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/todo/%s/settings", id), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/todo/lists/%s/settings", id), http.StatusSeeOther)
 	}
 }
 

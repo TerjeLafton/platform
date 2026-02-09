@@ -86,7 +86,7 @@ func TemplatesPage(userID string, templateList []*todov1.Template) templ.Compone
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-6\"><a href=\"/todo\" class=\"text-sm text-link hover:underline\">&larr; Back to lists</a></div><div class=\"mb-8 flex items-center justify-between\"><h1 class=\"text-2xl font-bold\">Templates</h1></div><form method=\"POST\" action=\"/templates\" class=\"mb-6 flex gap-2\"><input type=\"text\" name=\"title\" placeholder=\"New template name...\" required class=\"flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-6\"><a href=\"/todo\" class=\"text-sm text-link hover:underline\">&larr; Back to lists</a></div><div class=\"mb-8 flex items-center justify-between\"><h1 class=\"text-2xl font-bold\">Templates</h1></div><form method=\"POST\" action=\"/todo/templates\" class=\"mb-6 flex gap-2\"><input type=\"text\" name=\"title\" placeholder=\"New template name...\" required class=\"flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -161,9 +161,9 @@ func TemplateCard(t *todov1.Template) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 templ.SafeURL
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/templates/%s", t.Id)))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/todo/templates/%s", t.Id)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/templates_page.templ`, Line: 50, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/templates_page.templ`, Line: 50, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -176,7 +176,7 @@ func TemplateCard(t *todov1.Template) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(t.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/templates_page.templ`, Line: 53, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/templates_page.templ`, Line: 53, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -200,7 +200,7 @@ func TemplateCard(t *todov1.Template) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d items", t.ItemCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `apps/web/internal/templates/templates_page.templ`, Line: 61, Col: 42}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/templates_page.templ`, Line: 61, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
