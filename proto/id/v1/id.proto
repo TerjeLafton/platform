@@ -11,12 +11,14 @@ message User {
   string id = 1;           // UUID
   string email = 2;
   string created_at = 3;   // RFC3339 timestamp
+  string name = 4;
 }
 
 // Register new user
 message RegisterRequest {
   string email = 1;
   string password = 2;
+  string name = 3;
 }
 
 message RegisterResponse {
@@ -43,3 +45,30 @@ message ValidateTokenRequest {
 message ValidateTokenResponse {
   string user_id = 1;  // UUID extracted from valid token
 }
+
+// Get user by ID
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+// Avatar operations
+message GetAvatarRequest {
+  string user_id = 1;
+}
+
+message GetAvatarResponse {
+  bytes avatar = 1;
+  string content_type = 2;
+}
+
+message UpdateAvatarRequest {
+  string user_id = 1;
+  bytes avatar = 2;
+  string content_type = 3;
+}
+
+message UpdateAvatarResponse {}
