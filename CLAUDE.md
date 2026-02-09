@@ -2,12 +2,19 @@
 
 ## Architecture
 
-**3-Layer Design:**
+**Backend services (todo, id) — 3-Layer Design:**
 - **Handler** (NATS) - Request/response, protobuf marshaling
 - **Service** - Business logic, validation, orchestration
 - **Data** (sqlc) - Database queries
 
 Keep layers thin. Service validates, database enforces.
+
+**Web service — Thin frontend:**
+- **Handler** (HTTP) - Form parsing, render templates
+- **NATSClient** - Typed wrappers around NATS request/reply to backend services
+- **Middleware** - Auth validation via `id.auth.validate`
+
+The web service owns no database. All data flows through NATS to backend services.
 
 ## Key Decisions
 
@@ -24,12 +31,15 @@ Keep layers thin. Service validates, database enforces.
 - **Direct publish** - Don't wrap in goroutines, `nc.Publish()` is already non-blocking
 
 ### Logging (slog)
-- **INFO** - Normal operations (request received, list created)
-- **WARN** - Expected errors (validation failures)
-- **ERROR** - Unexpected errors (database failures, bugs)
-- **Component context:** `logger.With("component", "service")`
+- **INFO** - Normal operations (list created, user registered)
+- **WARN** - Expected errors (validation failures, bad input)
+- **ERROR** - Unexpected errors (database failures, NATS errors)
+- **Root logger:** `logger.With("service", "todo")` — set in main.go
+- **Module context:** `logger.With("module", "service")` / `"handler"` / `"middleware"`
+- **Service layer owns success logs** — handlers only log errors/warnings, never duplicate the service's success log
+- **Always include context** — `user_id`, `list_id`, `item_id`, `error` as appropriate
 
-**Why:** ERROR triggers alerts. Validation failures are WARN, not ERROR.
+**Why:** ERROR triggers alerts. Validation failures are WARN, not ERROR. Single success log per operation avoids noise.
 
 ### Error Handling
 - **ValidationError** for expected user errors
@@ -78,6 +88,15 @@ apps/
       schema.sql      # Users table
       queries.sql     # User queries
     .env              # JWT_SECRET, DB config
+  web/                # Web frontend (no database)
+    cmd/server/       # Production entrypoint
+    internal/
+      handlers/       # HTTP handlers (auth, todo)
+      middleware/      # Auth middleware
+      natsclient/     # NATS request/reply wrappers
+      templates/      # Templ pages
+      templates/ui/   # Reusable UI components
+    static/css/       # Tailwind input + generated CSS
 
 proto/
   common/v1/          # Shared messages (ErrorResponse)
@@ -93,18 +112,25 @@ migrations/           # Atlas migrations (all services)
 # Start infrastructure and migrations
 just compose-up && sleep 3 && just migrate-apply
 
-# Run services
-cd apps/id && just run-server      # Terminal 1 - Auth service
-cd apps/todo && just run-server    # Terminal 2 - Todo service
+# Run all services (id + todo + web on :8080)
+just run-all
 
-# Test services
+# Or run individually
+cd apps/id && just run-server      # Auth service
+cd apps/todo && just run-server    # Todo service
+cd apps/web && just run-server     # Web frontend (:8080)
+
+# Test backend services
 cd apps/id && just run-client      # Test auth
 cd apps/todo && just run-client    # Test todo
 
 # Clean database (drops and recreates)
 just db-clean && sleep 3 && just migrate-apply
 
-# Add new operation to a service
+# Regenerate all generated code (proto stubs, sqlc, templ, CSS)
+just generate
+
+# Add new operation to a backend service
 1. Add SQL to db/queries.sql
 2. just generate (from root)
 3. Add service method
@@ -116,9 +142,12 @@ just db-clean && sleep 3 && just migrate-apply
 
 - **sqlc** - Type-safe SQL queries
 - **Atlas** - Schema-based migrations (auto-creates atlas_dev)
-- **Just** - Task runner (root + per-service)
+- **Just** - Task runner (root + per-service Justfiles via `mod`)
 - **NATS** - Messaging (request/reply + pub/sub)
 - **Protobuf** - Serialization
+- **templ** - Type-safe HTML templates (run `templ generate`, commit `*_templ.go`)
+- **Tailwind v4** - CSS with semantic tokens (see `apps/web/CLAUDE.md` for token list)
+- **HTMX** - In-page interactions on authenticated pages (not used for auth forms)
 
 ## Conventions
 
@@ -144,6 +173,12 @@ for subject, handler := range subjects {
 **Authorization:**
 - Include `user_id` in WHERE: `WHERE id = $1 AND user_id = $2`
 - Database enforces ownership
+
+**Web handlers:**
+- Only log errors/warnings (success is logged by the backend service)
+- Always include `user_id` and entity IDs in error logs
+- Auth forms use plain HTML + 303 redirects (no HTMX)
+- Todo pages use HTMX for in-page interactions
 
 **Validation:**
 - App: Fast fail with friendly errors
