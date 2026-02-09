@@ -46,6 +46,7 @@ func main() {
 	mux.HandleFunc("POST /login", handlers.HandleLogin(nc, cookieName, handlerLogger))
 	mux.HandleFunc("GET /register", handlers.HandleRegisterPage)
 	mux.HandleFunc("POST /register", handlers.HandleRegister(nc, cookieName, handlerLogger))
+	mux.HandleFunc("GET /avatar/{id}", handlers.HandleAvatar(nc, handlerLogger))
 
 	// Protected routes
 	mux.Handle("GET /{$}", requireAuth(http.HandlerFunc(handlers.HandleHomePage)))
