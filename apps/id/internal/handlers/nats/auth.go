@@ -17,7 +17,7 @@ func (h *Handler) HandleRegister(msg *nats.Msg) {
 		return
 	}
 
-	user, token, err := h.service.Register(context.Background(), req.Email, req.Password)
+	user, token, err := h.service.Register(context.Background(), req.Email, req.Password, req.Name)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
 			h.logger.Warn("validation failed", "field", valErr.Field, "error", valErr.Message)
@@ -34,6 +34,7 @@ func (h *Handler) HandleRegister(msg *nats.Msg) {
 			Id:        user.ID.String(),
 			Email:     user.Email,
 			CreatedAt: user.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			Name:      user.Name,
 		},
 		Token: token,
 	}
@@ -71,6 +72,7 @@ func (h *Handler) HandleLogin(msg *nats.Msg) {
 			Id:        user.ID.String(),
 			Email:     user.Email,
 			CreatedAt: user.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			Name:      user.Name,
 		},
 		Token: token,
 	}

@@ -10,8 +10,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *Service) Register(ctx context.Context, email, password string) (*db.IDUser, string, error) {
+func (s *Service) Register(ctx context.Context, email, password, name string) (*db.IDUser, string, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
+	name = strings.TrimSpace(name)
+
 	if email == "" {
 		return nil, "", &ValidationError{Field: "email", Message: "Email is required"}
 	}
@@ -20,6 +22,12 @@ func (s *Service) Register(ctx context.Context, email, password string) (*db.IDU
 	}
 	if len(password) < 8 {
 		return nil, "", &ValidationError{Field: "password", Message: "Password must be at least 8 characters"}
+	}
+	if name == "" {
+		return nil, "", &ValidationError{Field: "name", Message: "Name is required"}
+	}
+	if len(name) > 100 {
+		return nil, "", &ValidationError{Field: "name", Message: "Name must be 100 characters or less"}
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -31,6 +39,7 @@ func (s *Service) Register(ctx context.Context, email, password string) (*db.IDU
 	user, err := s.queries.CreateUser(ctx, db.CreateUserParams{
 		Email:        email,
 		PasswordHash: string(hashedPassword),
+		Name:         name,
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "unique") || strings.Contains(err.Error(), "duplicate") {
