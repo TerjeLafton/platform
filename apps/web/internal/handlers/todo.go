@@ -8,6 +8,7 @@ import (
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
 	"github.com/terjelafton/platform/apps/web/internal/natsclient"
 	"github.com/terjelafton/platform/apps/web/internal/templates"
+	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
 )
 
 func HandleListsPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
@@ -69,7 +70,6 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 			return
 		}
 
-		// Find the specific list
 		var found bool
 		for _, list := range lists {
 			if list.Id == id {
@@ -80,7 +80,17 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 					return
 				}
 
-				templates.ListDetailPage(userID, list, items).Render(r.Context(), w)
+				var members []*todov1.ListMember
+				if list.IsOwner {
+					members, err = natsclient.GetListMembers(nc, id, userID)
+					if err != nil {
+						logger.Error("failed to get members", "error", err, "user_id", userID, "list_id", id)
+						http.Error(w, "Failed to load members", http.StatusInternalServerError)
+						return
+					}
+				}
+
+				templates.ListDetailPage(userID, list, items, members).Render(r.Context(), w)
 				found = true
 				break
 			}
@@ -150,6 +160,56 @@ func HandleDeleteItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 		err := natsclient.DeleteItem(nc, id, userID)
 		if err != nil {
 			logger.Warn("failed to delete item", "error", err, "user_id", userID, "item_id", id)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func HandleAddListMember(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := middleware.UserIDFromContext(r.Context())
+		listID := r.PathValue("id")
+		email := r.FormValue("email")
+
+		member, err := natsclient.AddListMember(nc, listID, userID, email)
+		if err != nil {
+			logger.Warn("failed to add member", "error", err, "user_id", userID, "list_id", listID, "email", email)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		templates.MemberRow(listID, member).Render(r.Context(), w)
+	}
+}
+
+func HandleRemoveListMember(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := middleware.UserIDFromContext(r.Context())
+		listID := r.PathValue("id")
+		memberID := r.PathValue("memberID")
+
+		err := natsclient.RemoveListMember(nc, listID, userID, memberID)
+		if err != nil {
+			logger.Warn("failed to remove member", "error", err, "user_id", userID, "list_id", listID, "member_id", memberID)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func HandleLeaveList(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := middleware.UserIDFromContext(r.Context())
+		listID := r.PathValue("id")
+
+		err := natsclient.RemoveListMember(nc, listID, userID, userID)
+		if err != nil {
+			logger.Warn("failed to leave list", "error", err, "user_id", userID, "list_id", listID)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

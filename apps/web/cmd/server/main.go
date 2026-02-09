@@ -61,6 +61,9 @@ func main() {
 	mux.Handle("POST /todo/{id}/items", requireAuth(handlers.HandleCreateItem(nc, handlerLogger)))
 	mux.Handle("POST /todo/items/{id}/toggle", requireAuth(handlers.HandleToggleItem(nc, handlerLogger)))
 	mux.Handle("DELETE /todo/items/{id}", requireAuth(handlers.HandleDeleteItem(nc, handlerLogger)))
+	mux.Handle("POST /todo/{id}/members", requireAuth(handlers.HandleAddListMember(nc, handlerLogger)))
+	mux.Handle("DELETE /todo/{id}/members/{memberID}", requireAuth(handlers.HandleRemoveListMember(nc, handlerLogger)))
+	mux.Handle("POST /todo/{id}/leave", requireAuth(handlers.HandleLeaveList(nc, handlerLogger)))
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: mux}
