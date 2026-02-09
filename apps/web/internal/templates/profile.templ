@@ -1,0 +1,43 @@
+package templates
+
+import "github.com/terjelafton/platform/apps/web/internal/templates/ui"
+
+templ ProfilePage(userID, name, email, errorMsg string) {
+	@Layout("Profile") {
+		@ui.Navbar() {
+			<a href="/profile" class="flex items-center">
+				<img src={ "/avatar/" + userID } alt="avatar" class="h-8 w-8 rounded-full object-cover"/>
+			</a>
+			<form method="POST" action="/logout">
+				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
+			</form>
+		}
+		@ui.PageNarrow() {
+			@ui.Card() {
+				<h1 class="mb-6 text-2xl font-bold">Profile</h1>
+				@ui.AlertError(errorMsg)
+				<div class="mb-6 flex items-center gap-4">
+					<img src={ "/avatar/" + userID } alt="avatar" class="h-20 w-20 rounded-full object-cover"/>
+					<div>
+						<p class="text-lg font-medium">{ name }</p>
+						<p class="text-sm text-text-secondary">{ email }</p>
+					</div>
+				</div>
+				<h2 class="mb-4 text-lg font-semibold">Update Avatar</h2>
+				<form method="POST" action="/profile/avatar" enctype="multipart/form-data">
+					@ui.FormField("Profile Picture") {
+						<input
+							type="file"
+							name="avatar"
+							accept="image/jpeg,image/png"
+							required
+							class="block w-full text-sm text-text-secondary file:mr-4 file:rounded file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-medium file:text-brand-text hover:file:bg-brand-hover file:cursor-pointer"
+						/>
+					}
+					<p class="mb-4 text-xs text-text-muted">JPEG or PNG, max 1MB</p>
+					@ui.Button("Upload")
+				</form>
+			}
+		}
+	}
+}

@@ -51,6 +51,8 @@ func main() {
 	// Protected routes
 	mux.Handle("GET /{$}", requireAuth(http.HandlerFunc(handlers.HandleHomePage)))
 	mux.Handle("POST /logout", requireAuth(handlers.HandleLogout(cookieName)))
+	mux.Handle("GET /profile", requireAuth(handlers.HandleProfilePage(nc, handlerLogger)))
+	mux.Handle("POST /profile/avatar", requireAuth(handlers.HandleUploadAvatar(nc, handlerLogger)))
 	mux.Handle("GET /todo/{$}", requireAuth(handlers.HandleListsPage(nc, handlerLogger)))
 	mux.Handle("POST /todo", requireAuth(handlers.HandleCreateList(nc, handlerLogger)))
 	mux.Handle("GET /todo/{id}", requireAuth(handlers.HandleListDetail(nc, handlerLogger)))
