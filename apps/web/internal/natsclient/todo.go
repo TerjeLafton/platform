@@ -326,3 +326,221 @@ func GetListMembers(nc *nats.Conn, listID, userID string) ([]*todov1.ListMember,
 
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
+
+func CreateTemplate(nc *nats.Conn, userID, title string) (*todov1.Template, error) {
+	req := &todov1.CreateTemplateRequest{
+		UserId: userID,
+		Title:  title,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal create template request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.template.create", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp todov1.CreateTemplateResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil && resp.Template != nil {
+		return resp.Template, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from todo service")
+}
+
+func GetTemplatesByUser(nc *nats.Conn, userID string) ([]*todov1.Template, error) {
+	req := &todov1.GetTemplatesByUserRequest{
+		UserId: userID,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal get templates request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.template.get_by_user", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp todov1.GetTemplatesByUserResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil {
+		return resp.Templates, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from todo service")
+}
+
+func UpdateTemplateTitle(nc *nats.Conn, id, userID, title string) (*todov1.Template, error) {
+	req := &todov1.UpdateTemplateTitleRequest{
+		Id:     id,
+		UserId: userID,
+		Title:  title,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal update template title request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.template.update_title", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp todov1.UpdateTemplateTitleResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil && resp.Template != nil {
+		return resp.Template, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from todo service")
+}
+
+func DeleteTemplate(nc *nats.Conn, id, userID string) error {
+	req := &todov1.DeleteTemplateRequest{
+		Id:     id,
+		UserId: userID,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshal delete template request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.template.delete", data, requestTimeout)
+	if err != nil {
+		return fmt.Errorf("nats request: %w", err)
+	}
+
+	// DeleteTemplateResponse is empty on success — only check for errors
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return svcErr
+	}
+
+	return nil
+}
+
+func CreateTemplateItem(nc *nats.Conn, templateID, userID, title string) (*todov1.TemplateItem, error) {
+	req := &todov1.CreateTemplateItemRequest{
+		TemplateId: templateID,
+		UserId:     userID,
+		Title:      title,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal create template item request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.template_item.create", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp todov1.CreateTemplateItemResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil && resp.Item != nil {
+		return resp.Item, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from todo service")
+}
+
+func GetTemplateItems(nc *nats.Conn, templateID, userID string) ([]*todov1.TemplateItem, error) {
+	req := &todov1.GetTemplateItemsRequest{
+		TemplateId: templateID,
+		UserId:     userID,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal get template items request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.template_item.get_all", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp todov1.GetTemplateItemsResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil {
+		return resp.Items, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from todo service")
+}
+
+func DeleteTemplateItem(nc *nats.Conn, id, userID string) error {
+	req := &todov1.DeleteTemplateItemRequest{
+		Id:     id,
+		UserId: userID,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshal delete template item request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.template_item.delete", data, requestTimeout)
+	if err != nil {
+		return fmt.Errorf("nats request: %w", err)
+	}
+
+	// DeleteTemplateItemResponse is empty on success — only check for errors
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return svcErr
+	}
+
+	return nil
+}
+
+func UseTemplate(nc *nats.Conn, templateID, userID, title string) (*todov1.List, error) {
+	req := &todov1.UseTemplateRequest{
+		TemplateId: templateID,
+		UserId:     userID,
+		Title:      title,
+	}
+
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal use template request: %w", err)
+	}
+
+	msg, err := nc.Request("todo.template.use", data, requestTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("nats request: %w", err)
+	}
+
+	var resp todov1.UseTemplateResponse
+	if err := proto.Unmarshal(msg.Data, &resp); err == nil && resp.List != nil {
+		return resp.List, nil
+	}
+
+	if svcErr := parseError(msg.Data); svcErr != nil {
+		return nil, svcErr
+	}
+
+	return nil, fmt.Errorf("unexpected response from todo service")
+}
