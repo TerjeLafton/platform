@@ -102,6 +102,60 @@ func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (TodoLis
 	return i, err
 }
 
+const createTemplate = `-- name: CreateTemplate :one
+
+INSERT INTO todo.templates (user_id, title)
+VALUES ($1, $2)
+RETURNING id, user_id, title, created_at, updated_at
+`
+
+type CreateTemplateParams struct {
+	UserID uuid.UUID `json:"user_id"`
+	Title  string    `json:"title"`
+}
+
+// TEMPLATES
+func (q *Queries) CreateTemplate(ctx context.Context, arg CreateTemplateParams) (TodoTemplate, error) {
+	row := q.db.QueryRowContext(ctx, createTemplate, arg.UserID, arg.Title)
+	var i TodoTemplate
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Title,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createTemplateItem = `-- name: CreateTemplateItem :one
+
+INSERT INTO todo.template_items (template_id, title)
+SELECT $1, $2
+FROM todo.templates t
+WHERE t.id = $1 AND t.user_id = $3
+RETURNING id, template_id, title, created_at
+`
+
+type CreateTemplateItemParams struct {
+	TemplateID uuid.UUID `json:"template_id"`
+	Title      string    `json:"title"`
+	UserID     uuid.UUID `json:"user_id"`
+}
+
+// TEMPLATE ITEMS
+func (q *Queries) CreateTemplateItem(ctx context.Context, arg CreateTemplateItemParams) (TodoTemplateItem, error) {
+	row := q.db.QueryRowContext(ctx, createTemplateItem, arg.TemplateID, arg.Title, arg.UserID)
+	var i TodoTemplateItem
+	err := row.Scan(
+		&i.ID,
+		&i.TemplateID,
+		&i.Title,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const deleteItem = `-- name: DeleteItem :one
 DELETE FROM todo.items i
 USING todo.lists l
@@ -135,6 +189,43 @@ type DeleteListParams struct {
 
 func (q *Queries) DeleteList(ctx context.Context, arg DeleteListParams) (uuid.UUID, error) {
 	row := q.db.QueryRowContext(ctx, deleteList, arg.ID, arg.UserID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteTemplate = `-- name: DeleteTemplate :one
+DELETE FROM todo.templates
+WHERE id = $1 AND user_id = $2
+RETURNING id
+`
+
+type DeleteTemplateParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) DeleteTemplate(ctx context.Context, arg DeleteTemplateParams) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, deleteTemplate, arg.ID, arg.UserID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteTemplateItem = `-- name: DeleteTemplateItem :one
+DELETE FROM todo.template_items ti
+USING todo.templates t
+WHERE ti.id = $1 AND ti.template_id = t.id AND t.user_id = $2
+RETURNING ti.id
+`
+
+type DeleteTemplateItemParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) DeleteTemplateItem(ctx context.Context, arg DeleteTemplateItemParams) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, deleteTemplateItem, arg.ID, arg.UserID)
 	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
@@ -291,6 +382,119 @@ func (q *Queries) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]GetLi
 	return items, nil
 }
 
+const getTemplate = `-- name: GetTemplate :one
+SELECT id, user_id, title, created_at, updated_at FROM todo.templates
+WHERE id = $1 AND user_id = $2
+`
+
+type GetTemplateParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) GetTemplate(ctx context.Context, arg GetTemplateParams) (TodoTemplate, error) {
+	row := q.db.QueryRowContext(ctx, getTemplate, arg.ID, arg.UserID)
+	var i TodoTemplate
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Title,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getTemplateItems = `-- name: GetTemplateItems :many
+SELECT ti.id, ti.template_id, ti.title, ti.created_at FROM todo.template_items ti
+INNER JOIN todo.templates t ON ti.template_id = t.id
+WHERE ti.template_id = $1 AND t.user_id = $2
+ORDER BY ti.created_at
+`
+
+type GetTemplateItemsParams struct {
+	TemplateID uuid.UUID `json:"template_id"`
+	UserID     uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) GetTemplateItems(ctx context.Context, arg GetTemplateItemsParams) ([]TodoTemplateItem, error) {
+	rows, err := q.db.QueryContext(ctx, getTemplateItems, arg.TemplateID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TodoTemplateItem{}
+	for rows.Next() {
+		var i TodoTemplateItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.TemplateID,
+			&i.Title,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTemplatesByUser = `-- name: GetTemplatesByUser :many
+SELECT
+  t.id, t.user_id, t.title, t.created_at, t.updated_at,
+  COUNT(ti.id)::int AS item_count
+FROM todo.templates t
+LEFT JOIN todo.template_items ti ON ti.template_id = t.id
+WHERE t.user_id = $1
+GROUP BY t.id
+ORDER BY t.title
+`
+
+type GetTemplatesByUserRow struct {
+	ID        uuid.UUID `json:"id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	ItemCount int32     `json:"item_count"`
+}
+
+func (q *Queries) GetTemplatesByUser(ctx context.Context, userID uuid.UUID) ([]GetTemplatesByUserRow, error) {
+	rows, err := q.db.QueryContext(ctx, getTemplatesByUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetTemplatesByUserRow{}
+	for rows.Next() {
+		var i GetTemplatesByUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Title,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ItemCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const isListMember = `-- name: IsListMember :one
 SELECT EXISTS(
     SELECT 1 FROM todo.list_members
@@ -373,6 +577,34 @@ type UpdateListTitleParams struct {
 func (q *Queries) UpdateListTitle(ctx context.Context, arg UpdateListTitleParams) (TodoList, error) {
 	row := q.db.QueryRowContext(ctx, updateListTitle, arg.ID, arg.UserID, arg.Title)
 	var i TodoList
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Title,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateTemplateTitle = `-- name: UpdateTemplateTitle :one
+UPDATE todo.templates
+SET
+    title = $3,
+    updated_at = NOW()
+WHERE id = $1 AND user_id = $2
+RETURNING id, user_id, title, created_at, updated_at
+`
+
+type UpdateTemplateTitleParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+	Title  string    `json:"title"`
+}
+
+func (q *Queries) UpdateTemplateTitle(ctx context.Context, arg UpdateTemplateTitleParams) (TodoTemplate, error) {
+	row := q.db.QueryRowContext(ctx, updateTemplateTitle, arg.ID, arg.UserID, arg.Title)
+	var i TodoTemplate
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,

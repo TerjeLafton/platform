@@ -46,3 +46,18 @@ type TodoListMember struct {
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type TodoTemplate struct {
+	ID        uuid.UUID `json:"id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type TodoTemplateItem struct {
+	ID         uuid.UUID `json:"id"`
+	TemplateID uuid.UUID `json:"template_id"`
+	Title      string    `json:"title"`
+	CreatedAt  time.Time `json:"created_at"`
+}

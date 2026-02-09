@@ -92,3 +92,58 @@ SELECT EXISTS(
 -- name: GetListOwner :one
 SELECT user_id FROM todo.lists
 WHERE id = $1;
+
+-- TEMPLATES
+
+-- name: CreateTemplate :one
+INSERT INTO todo.templates (user_id, title)
+VALUES ($1, $2)
+RETURNING *;
+
+-- name: GetTemplatesByUser :many
+SELECT
+  t.*,
+  COUNT(ti.id)::int AS item_count
+FROM todo.templates t
+LEFT JOIN todo.template_items ti ON ti.template_id = t.id
+WHERE t.user_id = $1
+GROUP BY t.id
+ORDER BY t.title;
+
+-- name: GetTemplate :one
+SELECT * FROM todo.templates
+WHERE id = $1 AND user_id = $2;
+
+-- name: UpdateTemplateTitle :one
+UPDATE todo.templates
+SET
+    title = $3,
+    updated_at = NOW()
+WHERE id = $1 AND user_id = $2
+RETURNING *;
+
+-- name: DeleteTemplate :one
+DELETE FROM todo.templates
+WHERE id = $1 AND user_id = $2
+RETURNING id;
+
+-- TEMPLATE ITEMS
+
+-- name: CreateTemplateItem :one
+INSERT INTO todo.template_items (template_id, title)
+SELECT $1, $2
+FROM todo.templates t
+WHERE t.id = $1 AND t.user_id = $3
+RETURNING *;
+
+-- name: GetTemplateItems :many
+SELECT ti.* FROM todo.template_items ti
+INNER JOIN todo.templates t ON ti.template_id = t.id
+WHERE ti.template_id = $1 AND t.user_id = $2
+ORDER BY ti.created_at;
+
+-- name: DeleteTemplateItem :one
+DELETE FROM todo.template_items ti
+USING todo.templates t
+WHERE ti.id = $1 AND ti.template_id = t.id AND t.user_id = $2
+RETURNING ti.id;

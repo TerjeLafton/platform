@@ -17,16 +17,26 @@ type Querier interface {
 	CreateItem(ctx context.Context, arg CreateItemParams) (TodoItem, error)
 	// LISTS
 	CreateList(ctx context.Context, arg CreateListParams) (TodoList, error)
+	// TEMPLATES
+	CreateTemplate(ctx context.Context, arg CreateTemplateParams) (TodoTemplate, error)
+	// TEMPLATE ITEMS
+	CreateTemplateItem(ctx context.Context, arg CreateTemplateItemParams) (TodoTemplateItem, error)
 	DeleteItem(ctx context.Context, arg DeleteItemParams) (uuid.UUID, error)
 	DeleteList(ctx context.Context, arg DeleteListParams) (uuid.UUID, error)
+	DeleteTemplate(ctx context.Context, arg DeleteTemplateParams) (uuid.UUID, error)
+	DeleteTemplateItem(ctx context.Context, arg DeleteTemplateItemParams) (uuid.UUID, error)
 	GetAllItemsFromList(ctx context.Context, arg GetAllItemsFromListParams) ([]TodoItem, error)
 	GetListMembers(ctx context.Context, listID uuid.UUID) ([]TodoListMember, error)
 	GetListOwner(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	GetListsByUser(ctx context.Context, userID uuid.UUID) ([]GetListsByUserRow, error)
+	GetTemplate(ctx context.Context, arg GetTemplateParams) (TodoTemplate, error)
+	GetTemplateItems(ctx context.Context, arg GetTemplateItemsParams) ([]TodoTemplateItem, error)
+	GetTemplatesByUser(ctx context.Context, userID uuid.UUID) ([]GetTemplatesByUserRow, error)
 	IsListMember(ctx context.Context, arg IsListMemberParams) (bool, error)
 	RemoveListMember(ctx context.Context, arg RemoveListMemberParams) error
 	ToggleItemCompleted(ctx context.Context, arg ToggleItemCompletedParams) (TodoItem, error)
 	UpdateListTitle(ctx context.Context, arg UpdateListTitleParams) (TodoList, error)
+	UpdateTemplateTitle(ctx context.Context, arg UpdateTemplateTitleParams) (TodoTemplate, error)
 }
 
 var _ Querier = (*Queries)(nil)
