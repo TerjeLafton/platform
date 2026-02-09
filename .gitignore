@@ -42,3 +42,6 @@ temp/
 
 # Logs
 *.log
+
+# Plans/design docs
+docs/plans/
