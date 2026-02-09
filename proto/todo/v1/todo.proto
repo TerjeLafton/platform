@@ -156,3 +156,91 @@ message GetListMembersRequest {
 message GetListMembersResponse {
   repeated ListMember members = 1;
 }
+
+// Template Operations
+
+message Template {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  int32 item_count = 6;
+}
+
+message TemplateItem {
+  string id = 1;
+  string template_id = 2;
+  string title = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message CreateTemplateRequest {
+  string user_id = 1;
+  string title = 2;
+}
+
+message CreateTemplateResponse {
+  Template template = 1;
+}
+
+message GetTemplatesByUserRequest {
+  string user_id = 1;
+}
+
+message GetTemplatesByUserResponse {
+  repeated Template templates = 1;
+}
+
+message UpdateTemplateTitleRequest {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+}
+
+message UpdateTemplateTitleResponse {
+  Template template = 1;
+}
+
+message DeleteTemplateRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteTemplateResponse {}
+
+message CreateTemplateItemRequest {
+  string template_id = 1;
+  string title = 2;
+  string user_id = 3;
+}
+
+message CreateTemplateItemResponse {
+  TemplateItem item = 1;
+}
+
+message DeleteTemplateItemRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteTemplateItemResponse {}
+
+message GetTemplateItemsRequest {
+  string template_id = 1;
+  string user_id = 2;
+}
+
+message GetTemplateItemsResponse {
+  repeated TemplateItem items = 1;
+}
+
+message UseTemplateRequest {
+  string template_id = 1;
+  string user_id = 2;
+  string title = 3;
+}
+
+message UseTemplateResponse {
+  List list = 1;
+}
