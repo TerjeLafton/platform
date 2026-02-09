@@ -34,3 +34,25 @@ CREATE TABLE todo.list_members (
 );
 
 CREATE INDEX idx_list_members_user_id ON todo.list_members(user_id);
+
+CREATE TABLE todo.templates (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    user_id UUID NOT NULL,
+    title TEXT NOT NULL CHECK (length(title) BETWEEN 1 AND 100),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(user_id, title)
+);
+
+CREATE INDEX idx_templates_user_id ON todo.templates(user_id);
+
+CREATE TABLE todo.template_items (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    template_id UUID NOT NULL
+        REFERENCES todo.templates (id)
+        ON DELETE CASCADE,
+    title TEXT NOT NULL CHECK (length(title) BETWEEN 1 AND 500),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_template_items_template_id ON todo.template_items(template_id);
