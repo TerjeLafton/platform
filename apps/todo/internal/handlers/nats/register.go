@@ -12,6 +12,9 @@ func (h *Handler) Register(nc *nats.Conn) error {
 		"todo.item.get_all":          h.HandleGetAllItemsFromList,
 		"todo.item.toggle_completed": h.HandleToggleItemCompleted,
 		"todo.item.delete":           h.HandleDeleteItem,
+		"todo.list.add_member":       h.HandleAddListMember,
+		"todo.list.remove_member":    h.HandleRemoveListMember,
+		"todo.list.get_members":      h.HandleGetListMembers,
 	}
 
 	for subject, handler := range subjects {

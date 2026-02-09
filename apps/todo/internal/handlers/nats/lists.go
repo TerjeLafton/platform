@@ -82,6 +82,8 @@ func (h *Handler) HandleGetListsByUser(msg *nats.Msg) {
 			UpdatedAt:      timestamppb.New(list.UpdatedAt),
 			TotalItems:     list.TotalItems,
 			CompletedItems: list.CompletedItems,
+			OwnerName:      list.OwnerName,
+			IsOwner:        list.IsOwner,
 		}
 	}
 
