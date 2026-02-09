@@ -78,7 +78,7 @@ func Input(inputType, name, placeholder string, required bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " class=\"block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " class=\"block w-full rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

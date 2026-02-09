@@ -60,7 +60,7 @@ func ListDetailPage(list *todov1.List, items []*todov1.Item) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form method=\"POST\" action=\"/logout\"><button type=\"submit\" class=\"text-sm text-gray-600 hover:text-gray-900 cursor-pointer\">Logout</button></form>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form method=\"POST\" action=\"/logout\"><button type=\"submit\" class=\"text-sm text-text-secondary hover:text-text-primary cursor-pointer\">Logout</button></form>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -86,7 +86,7 @@ func ListDetailPage(list *todov1.List, items []*todov1.Item) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-6\"><a href=\"/\" class=\"text-sm text-blue-600 hover:underline\">&larr; Back to lists</a></div><div class=\"mb-6\" id=\"list-title-section\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-6\"><a href=\"/todo\" class=\"text-sm text-link hover:underline\">&larr; Back to lists</a></div><div class=\"mb-6\" id=\"list-title-section\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -99,15 +99,15 @@ func ListDetailPage(list *todov1.List, items []*todov1.Item) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/lists/%s/items", list.Id))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/todo/%s/items", list.Id))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/list_detail.templ`, Line: 25, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/list_detail.templ`, Line: 25, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-target=\"#items-list\" hx-swap=\"beforeend\" hx-on::after-request=\"if(event.detail.successful) this.reset()\" class=\"mb-6 flex gap-2\"><input type=\"text\" name=\"title\" placeholder=\"Add a new item...\" required class=\"flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-target=\"#items-list\" hx-swap=\"beforeend\" hx-on::after-request=\"if(event.detail.successful) this.reset()\" class=\"mb-6 flex gap-2\"><input type=\"text\" name=\"title\" placeholder=\"Add a new item...\" required class=\"flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -130,7 +130,7 @@ func ListDetailPage(list *todov1.List, items []*todov1.Item) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				if len(items) == 0 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<p id=\"empty-state\" class=\"py-8 text-center text-gray-500\">No items yet. Add one above!</p>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<p id=\"empty-state\" class=\"py-8 text-center text-text-muted\">No items yet. Add one above!</p>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -185,14 +185,14 @@ func ListTitle(list *todov1.List) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</h1><button onclick=\"document.getElementById('title-display').style.display='none'; document.getElementById('title-edit').style.display='flex'; this.style.display='none'; document.getElementById('title-input').focus();\" class=\"text-sm text-gray-400 hover:text-gray-600 cursor-pointer\">Edit</button><form id=\"title-edit\" style=\"display:none\" hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</h1><button onclick=\"document.getElementById('title-display').style.display='none'; document.getElementById('title-edit').style.display='flex'; this.style.display='none'; document.getElementById('title-input').focus();\" class=\"text-sm text-text-muted hover:text-text-secondary cursor-pointer\">Edit</button><form id=\"title-edit\" style=\"display:none\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/lists/%s/title", list.Id))
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/todo/%s/title", list.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/list_detail.templ`, Line: 64, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/list_detail.templ`, Line: 64, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -211,7 +211,7 @@ func ListTitle(list *todov1.List) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" required class=\"rounded border border-gray-300 px-3 py-1 text-sm focus:border-gray-500 focus:outline-none\"> <button type=\"submit\" class=\"text-sm text-blue-600 hover:text-blue-800 cursor-pointer\">Save</button> <button type=\"button\" onclick=\"document.getElementById('title-display').style.display=''; document.getElementById('title-edit').style.display='none'; this.parentElement.previousElementSibling.previousElementSibling.style.display='';\" class=\"text-sm text-gray-400 hover:text-gray-600 cursor-pointer\">Cancel</button></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" required class=\"rounded border bg-input-bg border-input-border px-3 py-1 text-sm text-text-primary focus:border-brand focus:outline-none\"> <button type=\"submit\" class=\"text-sm text-link hover:text-link-hover cursor-pointer\">Save</button> <button type=\"button\" onclick=\"document.getElementById('title-display').style.display=''; document.getElementById('title-edit').style.display='none'; this.parentElement.previousElementSibling.previousElementSibling.style.display='';\" class=\"text-sm text-text-muted hover:text-text-secondary cursor-pointer\">Cancel</button></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -253,7 +253,7 @@ func ItemRow(item *todov1.Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"flex items-center gap-3 rounded border border-gray-200 bg-white px-4 py-3\"><input type=\"checkbox\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" class=\"flex items-center gap-3 rounded border border-border-subtle bg-surface px-4 py-3\"><input type=\"checkbox\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -268,9 +268,9 @@ func ItemRow(item *todov1.Item) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/items/%s/toggle", item.Id))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/todo/items/%s/toggle", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/list_detail.templ`, Line: 96, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/list_detail.templ`, Line: 96, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -289,12 +289,12 @@ func ItemRow(item *todov1.Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-swap=\"outerHTML\" class=\"h-4 w-4 cursor-pointer\"> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-swap=\"outerHTML\" class=\"h-4 w-4 cursor-pointer accent-brand\"> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 = []any{"flex-1",
-			templ.KV("line-through text-gray-400", item.Completed),
+			templ.KV("line-through text-completed", item.Completed),
 		}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var14...)
 		if templ_7745c5c3_Err != nil {
@@ -331,9 +331,9 @@ func ItemRow(item *todov1.Item) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/items/%s", item.Id))
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/todo/items/%s", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/list_detail.templ`, Line: 110, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/list_detail.templ`, Line: 110, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -352,7 +352,7 @@ func ItemRow(item *todov1.Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" hx-swap=\"outerHTML\" class=\"text-sm text-red-500 hover:text-red-700 cursor-pointer\">Delete</button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" hx-swap=\"outerHTML\" class=\"text-sm text-delete hover:text-delete-hover cursor-pointer\">Delete</button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

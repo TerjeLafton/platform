@@ -127,7 +127,7 @@ func LoginPage(errorMsg string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</form><p class=\"mt-4 text-sm text-gray-600\">Don't have an account? <a href=\"/register\" class=\"text-blue-600 hover:underline\">Register</a></p>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</form><p class=\"mt-4 text-sm text-text-secondary\">Don't have an account? <a href=\"/register\" class=\"text-link hover:underline\">Register</a></p>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

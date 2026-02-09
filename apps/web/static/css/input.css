@@ -1,2 +1,41 @@
 @import "tailwindcss";
 @source "../../internal/templates";
+
+@theme {
+  /* Neutral surfaces */
+  --color-base: oklch(0.13 0.015 280);
+  --color-surface: oklch(0.18 0.015 280);
+  --color-raised: oklch(0.22 0.015 280);
+
+  /* Borders */
+  --color-border: oklch(0.28 0.015 280);
+  --color-border-subtle: oklch(0.23 0.015 280);
+
+  /* Text */
+  --color-text-primary: oklch(0.93 0.01 280);
+  --color-text-secondary: oklch(0.65 0.015 280);
+  --color-text-muted: oklch(0.50 0.015 280);
+
+  /* Brand (indigo) */
+  --color-brand: oklch(0.55 0.20 280);
+  --color-brand-hover: oklch(0.60 0.22 280);
+  --color-brand-text: oklch(0.98 0.02 280);
+  --color-link: oklch(0.65 0.17 280);
+  --color-link-hover: oklch(0.72 0.18 280);
+
+  /* Input */
+  --color-input-bg: oklch(0.15 0.015 280);
+  --color-input-border: oklch(0.30 0.015 280);
+
+  /* Error */
+  --color-error-bg: oklch(0.20 0.05 25);
+  --color-error-text: oklch(0.70 0.17 25);
+  --color-error-border: oklch(0.30 0.08 25);
+  --color-danger: oklch(0.55 0.20 25);
+  --color-danger-text: oklch(0.98 0.02 25);
+  --color-delete: oklch(0.65 0.17 25);
+  --color-delete-hover: oklch(0.72 0.18 25);
+
+  /* Completed items */
+  --color-completed: oklch(0.45 0.015 280);
+}

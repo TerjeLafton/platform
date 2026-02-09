@@ -127,7 +127,7 @@ func RegisterPage(errorMsg string) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</form><p class=\"mt-4 text-sm text-gray-600\">Already have an account? <a href=\"/login\" class=\"text-blue-600 hover:underline\">Login</a></p>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</form><p class=\"mt-4 text-sm text-text-secondary\">Already have an account? <a href=\"/login\" class=\"text-link hover:underline\">Login</a></p>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

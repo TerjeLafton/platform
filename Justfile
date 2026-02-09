@@ -36,3 +36,11 @@ compose-up:
 
 compose-down:
   podman compose down
+
+run-all:
+  #!/usr/bin/env bash
+  trap 'kill 0' EXIT
+  (cd apps/id && go run ./cmd/server) &
+  (cd apps/todo && go run ./cmd/server) &
+  (cd apps/web && go run ./cmd/server) &
+  wait

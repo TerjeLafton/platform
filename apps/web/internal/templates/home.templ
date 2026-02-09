@@ -1,0 +1,22 @@
+package templates
+
+import "github.com/terjelafton/platform/apps/web/internal/templates/ui"
+
+templ HomePage() {
+	@Layout("Home") {
+		@ui.Navbar() {
+			<form method="POST" action="/logout">
+				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
+			</form>
+		}
+		@ui.PageWide() {
+			<h1 class="mb-6 text-2xl font-bold">Home</h1>
+			<div class="space-y-3">
+				<a href="/todo" class="flex items-center justify-between rounded-lg border border-border-subtle bg-surface px-4 py-3 text-link hover:text-link-hover">
+					<span class="font-medium">Todo Lists</span>
+					<span class="text-text-muted">&rarr;</span>
+				</a>
+			</div>
+		}
+	}
+}

@@ -11,18 +11,18 @@ templ ListDetailPage(list *todov1.List, items []*todov1.Item) {
 	@Layout(list.Title) {
 		@ui.Navbar() {
 			<form method="POST" action="/logout">
-				<button type="submit" class="text-sm text-gray-600 hover:text-gray-900 cursor-pointer">Logout</button>
+				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
 			</form>
 		}
 		@ui.PageWide() {
 			<div class="mb-6">
-				<a href="/" class="text-sm text-blue-600 hover:underline">&larr; Back to lists</a>
+				<a href="/todo" class="text-sm text-link hover:underline">&larr; Back to lists</a>
 			</div>
 			<div class="mb-6" id="list-title-section">
 				@ListTitle(list)
 			</div>
 			<form
-				hx-post={ fmt.Sprintf("/lists/%s/items", list.Id) }
+				hx-post={ fmt.Sprintf("/todo/%s/items", list.Id) }
 				hx-target="#items-list"
 				hx-swap="beforeend"
 				hx-on::after-request="if(event.detail.successful) this.reset()"
@@ -33,7 +33,7 @@ templ ListDetailPage(list *todov1.List, items []*todov1.Item) {
 					name="title"
 					placeholder="Add a new item..."
 					required
-					class="flex-1 rounded border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+					class="flex-1 rounded border bg-input-bg border-input-border px-3 py-2 text-sm text-text-primary focus:border-brand focus:outline-none placeholder:text-text-muted"
 				/>
 				@ui.Button("Add Item")
 			</form>
@@ -43,7 +43,7 @@ templ ListDetailPage(list *todov1.List, items []*todov1.Item) {
 				}
 			</div>
 			if len(items) == 0 {
-				<p id="empty-state" class="py-8 text-center text-gray-500">No items yet. Add one above!</p>
+				<p id="empty-state" class="py-8 text-center text-text-muted">No items yet. Add one above!</p>
 			}
 		}
 	}
@@ -54,14 +54,14 @@ templ ListTitle(list *todov1.List) {
 		<h1 class="text-2xl font-bold" id="title-display">{ list.Title }</h1>
 		<button
 			onclick="document.getElementById('title-display').style.display='none'; document.getElementById('title-edit').style.display='flex'; this.style.display='none'; document.getElementById('title-input').focus();"
-			class="text-sm text-gray-400 hover:text-gray-600 cursor-pointer"
+			class="text-sm text-text-muted hover:text-text-secondary cursor-pointer"
 		>
 			Edit
 		</button>
 		<form
 			id="title-edit"
 			style="display:none"
-			hx-post={ fmt.Sprintf("/lists/%s/title", list.Id) }
+			hx-post={ fmt.Sprintf("/todo/%s/title", list.Id) }
 			hx-target="#list-title-section"
 			hx-swap="innerHTML"
 			class="flex items-center gap-2"
@@ -72,13 +72,13 @@ templ ListTitle(list *todov1.List) {
 				name="title"
 				value={ list.Title }
 				required
-				class="rounded border border-gray-300 px-3 py-1 text-sm focus:border-gray-500 focus:outline-none"
+				class="rounded border bg-input-bg border-input-border px-3 py-1 text-sm text-text-primary focus:border-brand focus:outline-none"
 			/>
-			<button type="submit" class="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">Save</button>
+			<button type="submit" class="text-sm text-link hover:text-link-hover cursor-pointer">Save</button>
 			<button
 				type="button"
 				onclick="document.getElementById('title-display').style.display=''; document.getElementById('title-edit').style.display='none'; this.parentElement.previousElementSibling.previousElementSibling.style.display='';"
-				class="text-sm text-gray-400 hover:text-gray-600 cursor-pointer"
+				class="text-sm text-text-muted hover:text-text-secondary cursor-pointer"
 			>
 				Cancel
 			</button>
@@ -87,30 +87,30 @@ templ ListTitle(list *todov1.List) {
 }
 
 templ ItemRow(item *todov1.Item) {
-	<div id={ fmt.Sprintf("item-%s", item.Id) } class="flex items-center gap-3 rounded border border-gray-200 bg-white px-4 py-3">
+	<div id={ fmt.Sprintf("item-%s", item.Id) } class="flex items-center gap-3 rounded border border-border-subtle bg-surface px-4 py-3">
 		<input
 			type="checkbox"
 			if item.Completed {
 				checked
 			}
-			hx-post={ fmt.Sprintf("/items/%s/toggle", item.Id) }
+			hx-post={ fmt.Sprintf("/todo/items/%s/toggle", item.Id) }
 			hx-target={ fmt.Sprintf("#item-%s", item.Id) }
 			hx-swap="outerHTML"
-			class="h-4 w-4 cursor-pointer"
+			class="h-4 w-4 cursor-pointer accent-brand"
 		/>
 		<span
 			class={
 				"flex-1",
-				templ.KV("line-through text-gray-400", item.Completed),
+				templ.KV("line-through text-completed", item.Completed),
 			}
 		>
 			{ item.Title }
 		</span>
 		<button
-			hx-delete={ fmt.Sprintf("/items/%s", item.Id) }
+			hx-delete={ fmt.Sprintf("/todo/items/%s", item.Id) }
 			hx-target={ fmt.Sprintf("#item-%s", item.Id) }
 			hx-swap="outerHTML"
-			class="text-sm text-red-500 hover:text-red-700 cursor-pointer"
+			class="text-sm text-delete hover:text-delete-hover cursor-pointer"
 		>
 			Delete
 		</button>
