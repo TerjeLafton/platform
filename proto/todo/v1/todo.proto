@@ -17,6 +17,8 @@ message List {
   google.protobuf.Timestamp updated_at = 5;
   int32 total_items = 6;
   int32 completed_items = 7;
+  string owner_name = 8;
+  bool is_owner = 9;
 }
 
 message Item {
@@ -111,4 +113,40 @@ message ListCreatedEvent {
 message ItemCompletedEvent {
   Item item = 1;
   google.protobuf.Timestamp occurred_at = 2;
+}
+
+// Sharing Operations
+
+message ListMember {
+  string user_id = 1;
+  string email = 2;
+  string name = 3;
+  google.protobuf.Timestamp added_at = 4;
+}
+
+message AddListMemberRequest {
+  string list_id = 1;
+  string user_id = 2;
+  string member_email = 3;
+}
+
+message AddListMemberResponse {
+  ListMember member = 1;
+}
+
+message RemoveListMemberRequest {
+  string list_id = 1;
+  string user_id = 2;
+  string member_user_id = 3;
+}
+
+message RemoveListMemberResponse {}
+
+message GetListMembersRequest {
+  string list_id = 1;
+  string user_id = 2;
+}
+
+message GetListMembersResponse {
+  repeated ListMember members = 1;
 }

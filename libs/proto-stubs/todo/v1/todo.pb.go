@@ -32,6 +32,8 @@ type List struct {
 	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	TotalItems     int32                  `protobuf:"varint,6,opt,name=total_items,json=totalItems,proto3" json:"total_items,omitempty"`
 	CompletedItems int32                  `protobuf:"varint,7,opt,name=completed_items,json=completedItems,proto3" json:"completed_items,omitempty"`
+	OwnerName      string                 `protobuf:"bytes,8,opt,name=owner_name,json=ownerName,proto3" json:"owner_name,omitempty"`
+	IsOwner        bool                   `protobuf:"varint,9,opt,name=is_owner,json=isOwner,proto3" json:"is_owner,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -113,6 +115,20 @@ func (x *List) GetCompletedItems() int32 {
 		return x.CompletedItems
 	}
 	return 0
+}
+
+func (x *List) GetOwnerName() string {
+	if x != nil {
+		return x.OwnerName
+	}
+	return ""
+}
+
+func (x *List) GetIsOwner() bool {
+	if x != nil {
+		return x.IsOwner
+	}
+	return false
 }
 
 type Item struct {
@@ -1063,11 +1079,375 @@ func (x *ItemCompletedEvent) GetOccurredAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type ListMember struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	AddedAt       *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=added_at,json=addedAt,proto3" json:"added_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMember) Reset() {
+	*x = ListMember{}
+	mi := &file_todo_v1_todo_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMember) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMember) ProtoMessage() {}
+
+func (x *ListMember) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMember.ProtoReflect.Descriptor instead.
+func (*ListMember) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListMember) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ListMember) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *ListMember) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ListMember) GetAddedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.AddedAt
+	}
+	return nil
+}
+
+type AddListMemberRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ListId        string                 `protobuf:"bytes,1,opt,name=list_id,json=listId,proto3" json:"list_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MemberEmail   string                 `protobuf:"bytes,3,opt,name=member_email,json=memberEmail,proto3" json:"member_email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddListMemberRequest) Reset() {
+	*x = AddListMemberRequest{}
+	mi := &file_todo_v1_todo_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddListMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddListMemberRequest) ProtoMessage() {}
+
+func (x *AddListMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddListMemberRequest.ProtoReflect.Descriptor instead.
+func (*AddListMemberRequest) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *AddListMemberRequest) GetListId() string {
+	if x != nil {
+		return x.ListId
+	}
+	return ""
+}
+
+func (x *AddListMemberRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AddListMemberRequest) GetMemberEmail() string {
+	if x != nil {
+		return x.MemberEmail
+	}
+	return ""
+}
+
+type AddListMemberResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Member        *ListMember            `protobuf:"bytes,1,opt,name=member,proto3" json:"member,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddListMemberResponse) Reset() {
+	*x = AddListMemberResponse{}
+	mi := &file_todo_v1_todo_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddListMemberResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddListMemberResponse) ProtoMessage() {}
+
+func (x *AddListMemberResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddListMemberResponse.ProtoReflect.Descriptor instead.
+func (*AddListMemberResponse) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *AddListMemberResponse) GetMember() *ListMember {
+	if x != nil {
+		return x.Member
+	}
+	return nil
+}
+
+type RemoveListMemberRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ListId        string                 `protobuf:"bytes,1,opt,name=list_id,json=listId,proto3" json:"list_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MemberUserId  string                 `protobuf:"bytes,3,opt,name=member_user_id,json=memberUserId,proto3" json:"member_user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveListMemberRequest) Reset() {
+	*x = RemoveListMemberRequest{}
+	mi := &file_todo_v1_todo_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveListMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveListMemberRequest) ProtoMessage() {}
+
+func (x *RemoveListMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveListMemberRequest.ProtoReflect.Descriptor instead.
+func (*RemoveListMemberRequest) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *RemoveListMemberRequest) GetListId() string {
+	if x != nil {
+		return x.ListId
+	}
+	return ""
+}
+
+func (x *RemoveListMemberRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *RemoveListMemberRequest) GetMemberUserId() string {
+	if x != nil {
+		return x.MemberUserId
+	}
+	return ""
+}
+
+type RemoveListMemberResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveListMemberResponse) Reset() {
+	*x = RemoveListMemberResponse{}
+	mi := &file_todo_v1_todo_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveListMemberResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveListMemberResponse) ProtoMessage() {}
+
+func (x *RemoveListMemberResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveListMemberResponse.ProtoReflect.Descriptor instead.
+func (*RemoveListMemberResponse) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{24}
+}
+
+type GetListMembersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ListId        string                 `protobuf:"bytes,1,opt,name=list_id,json=listId,proto3" json:"list_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetListMembersRequest) Reset() {
+	*x = GetListMembersRequest{}
+	mi := &file_todo_v1_todo_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetListMembersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetListMembersRequest) ProtoMessage() {}
+
+func (x *GetListMembersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetListMembersRequest.ProtoReflect.Descriptor instead.
+func (*GetListMembersRequest) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *GetListMembersRequest) GetListId() string {
+	if x != nil {
+		return x.ListId
+	}
+	return ""
+}
+
+func (x *GetListMembersRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type GetListMembersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Members       []*ListMember          `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetListMembersResponse) Reset() {
+	*x = GetListMembersResponse{}
+	mi := &file_todo_v1_todo_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetListMembersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetListMembersResponse) ProtoMessage() {}
+
+func (x *GetListMembersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_todo_v1_todo_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetListMembersResponse.ProtoReflect.Descriptor instead.
+func (*GetListMembersResponse) Descriptor() ([]byte, []int) {
+	return file_todo_v1_todo_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *GetListMembersResponse) GetMembers() []*ListMember {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
 var File_todo_v1_todo_proto protoreflect.FileDescriptor
 
 const file_todo_v1_todo_proto_rawDesc = "" +
 	"\n" +
-	"\x12todo/v1/todo.proto\x12\atodo.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16common/v1/common.proto\"\x85\x02\n" +
+	"\x12todo/v1/todo.proto\x12\atodo.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16common/v1/common.proto\"\xbf\x02\n" +
 	"\x04List\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
@@ -1078,7 +1458,10 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x1f\n" +
 	"\vtotal_items\x18\x06 \x01(\x05R\n" +
 	"totalItems\x12'\n" +
-	"\x0fcompleted_items\x18\a \x01(\x05R\x0ecompletedItems\"\xd9\x01\n" +
+	"\x0fcompleted_items\x18\a \x01(\x05R\x0ecompletedItems\x12\x1d\n" +
+	"\n" +
+	"owner_name\x18\b \x01(\tR\townerName\x12\x19\n" +
+	"\bis_owner\x18\t \x01(\bR\aisOwner\"\xd9\x01\n" +
 	"\x04Item\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\alist_id\x18\x02 \x01(\tR\x06listId\x12\x14\n" +
@@ -1134,7 +1517,29 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\x12ItemCompletedEvent\x12!\n" +
 	"\x04item\x18\x01 \x01(\v2\r.todo.v1.ItemR\x04item\x12;\n" +
 	"\voccurred_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"occurredAtB*Z(platform/libs/proto-stubs/todo/v1;todov1b\x06proto3"
+	"occurredAt\"\x86\x01\n" +
+	"\n" +
+	"ListMember\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x125\n" +
+	"\badded_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\aaddedAt\"k\n" +
+	"\x14AddListMemberRequest\x12\x17\n" +
+	"\alist_id\x18\x01 \x01(\tR\x06listId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12!\n" +
+	"\fmember_email\x18\x03 \x01(\tR\vmemberEmail\"D\n" +
+	"\x15AddListMemberResponse\x12+\n" +
+	"\x06member\x18\x01 \x01(\v2\x13.todo.v1.ListMemberR\x06member\"q\n" +
+	"\x17RemoveListMemberRequest\x12\x17\n" +
+	"\alist_id\x18\x01 \x01(\tR\x06listId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12$\n" +
+	"\x0emember_user_id\x18\x03 \x01(\tR\fmemberUserId\"\x1a\n" +
+	"\x18RemoveListMemberResponse\"I\n" +
+	"\x15GetListMembersRequest\x12\x17\n" +
+	"\alist_id\x18\x01 \x01(\tR\x06listId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"G\n" +
+	"\x16GetListMembersResponse\x12-\n" +
+	"\amembers\x18\x01 \x03(\v2\x13.todo.v1.ListMemberR\amembersB*Z(platform/libs/proto-stubs/todo/v1;todov1b\x06proto3"
 
 var (
 	file_todo_v1_todo_proto_rawDescOnce sync.Once
@@ -1148,7 +1553,7 @@ func file_todo_v1_todo_proto_rawDescGZIP() []byte {
 	return file_todo_v1_todo_proto_rawDescData
 }
 
-var file_todo_v1_todo_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_todo_v1_todo_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_todo_v1_todo_proto_goTypes = []any{
 	(*List)(nil),                        // 0: todo.v1.List
 	(*Item)(nil),                        // 1: todo.v1.Item
@@ -1170,13 +1575,20 @@ var file_todo_v1_todo_proto_goTypes = []any{
 	(*DeleteItemResponse)(nil),          // 17: todo.v1.DeleteItemResponse
 	(*ListCreatedEvent)(nil),            // 18: todo.v1.ListCreatedEvent
 	(*ItemCompletedEvent)(nil),          // 19: todo.v1.ItemCompletedEvent
-	(*timestamppb.Timestamp)(nil),       // 20: google.protobuf.Timestamp
+	(*ListMember)(nil),                  // 20: todo.v1.ListMember
+	(*AddListMemberRequest)(nil),        // 21: todo.v1.AddListMemberRequest
+	(*AddListMemberResponse)(nil),       // 22: todo.v1.AddListMemberResponse
+	(*RemoveListMemberRequest)(nil),     // 23: todo.v1.RemoveListMemberRequest
+	(*RemoveListMemberResponse)(nil),    // 24: todo.v1.RemoveListMemberResponse
+	(*GetListMembersRequest)(nil),       // 25: todo.v1.GetListMembersRequest
+	(*GetListMembersResponse)(nil),      // 26: todo.v1.GetListMembersResponse
+	(*timestamppb.Timestamp)(nil),       // 27: google.protobuf.Timestamp
 }
 var file_todo_v1_todo_proto_depIdxs = []int32{
-	20, // 0: todo.v1.List.created_at:type_name -> google.protobuf.Timestamp
-	20, // 1: todo.v1.List.updated_at:type_name -> google.protobuf.Timestamp
-	20, // 2: todo.v1.Item.created_at:type_name -> google.protobuf.Timestamp
-	20, // 3: todo.v1.Item.updated_at:type_name -> google.protobuf.Timestamp
+	27, // 0: todo.v1.List.created_at:type_name -> google.protobuf.Timestamp
+	27, // 1: todo.v1.List.updated_at:type_name -> google.protobuf.Timestamp
+	27, // 2: todo.v1.Item.created_at:type_name -> google.protobuf.Timestamp
+	27, // 3: todo.v1.Item.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 4: todo.v1.CreateListResponse.list:type_name -> todo.v1.List
 	0,  // 5: todo.v1.GetListsByUserResponse.lists:type_name -> todo.v1.List
 	0,  // 6: todo.v1.UpdateListTitleResponse.list:type_name -> todo.v1.List
@@ -1184,14 +1596,17 @@ var file_todo_v1_todo_proto_depIdxs = []int32{
 	1,  // 8: todo.v1.GetAllItemsFromListResponse.items:type_name -> todo.v1.Item
 	1,  // 9: todo.v1.ToggleItemCompletedResponse.item:type_name -> todo.v1.Item
 	0,  // 10: todo.v1.ListCreatedEvent.list:type_name -> todo.v1.List
-	20, // 11: todo.v1.ListCreatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	27, // 11: todo.v1.ListCreatedEvent.occurred_at:type_name -> google.protobuf.Timestamp
 	1,  // 12: todo.v1.ItemCompletedEvent.item:type_name -> todo.v1.Item
-	20, // 13: todo.v1.ItemCompletedEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	14, // [14:14] is the sub-list for method output_type
-	14, // [14:14] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	27, // 13: todo.v1.ItemCompletedEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	27, // 14: todo.v1.ListMember.added_at:type_name -> google.protobuf.Timestamp
+	20, // 15: todo.v1.AddListMemberResponse.member:type_name -> todo.v1.ListMember
+	20, // 16: todo.v1.GetListMembersResponse.members:type_name -> todo.v1.ListMember
+	17, // [17:17] is the sub-list for method output_type
+	17, // [17:17] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_todo_v1_todo_proto_init() }
@@ -1205,7 +1620,7 @@ func file_todo_v1_todo_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_todo_v1_todo_proto_rawDesc), len(file_todo_v1_todo_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
