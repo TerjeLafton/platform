@@ -104,6 +104,35 @@ func (h *Handler) HandleValidateToken(msg *nats.Msg) {
 	h.respondSuccess(msg, resp)
 }
 
+func (h *Handler) HandleGetUserByEmail(msg *nats.Msg) {
+	var req idv1.GetUserByEmailRequest
+	if err := proto.Unmarshal(msg.Data, &req); err != nil {
+		h.logger.Warn("failed to unmarshal get user by email request", "error", err)
+		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
+		return
+	}
+
+	user, err := h.service.GetUserByEmail(context.Background(), req.Email)
+	if err != nil {
+		if valErr, ok := err.(*service.ValidationError); ok {
+			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
+			return
+		}
+		h.logger.Error("failed to get user by email", "error", err)
+		h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
+		return
+	}
+
+	h.respondSuccess(msg, &idv1.GetUserByEmailResponse{
+		User: &idv1.User{
+			Id:        user.ID.String(),
+			Email:     user.Email,
+			Name:      user.Name,
+			CreatedAt: user.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		},
+	})
+}
+
 func (h *Handler) HandleGetUser(msg *nats.Msg) {
 	var req idv1.GetUserRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {

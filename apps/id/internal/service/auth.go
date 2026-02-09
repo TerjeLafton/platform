@@ -94,6 +94,24 @@ func (s *Service) Login(ctx context.Context, email, password string) (*db.IDUser
 	return &user, token, nil
 }
 
+func (s *Service) GetUserByEmail(ctx context.Context, email string) (*db.IDUser, error) {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if email == "" {
+		return nil, &ValidationError{Field: "email", Message: "Email is required"}
+	}
+
+	user, err := s.queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, &ValidationError{Field: "email", Message: "No account found with that email"}
+		}
+		s.logger.Error("failed to get user by email", "error", err, "email", email)
+		return nil, fmt.Errorf("internal error")
+	}
+
+	return &user, nil
+}
+
 func (s *Service) GetUser(ctx context.Context, userID uuid.UUID) (*db.IDUser, error) {
 	user, err := s.queries.GetUserByID(ctx, userID)
 	if err != nil {

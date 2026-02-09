@@ -680,6 +680,95 @@ func (*UpdateAvatarResponse) Descriptor() ([]byte, []int) {
 	return file_id_v1_id_proto_rawDescGZIP(), []int{12}
 }
 
+// Get user by email (for sharing lookups)
+type GetUserByEmailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByEmailRequest) Reset() {
+	*x = GetUserByEmailRequest{}
+	mi := &file_id_v1_id_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByEmailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByEmailRequest) ProtoMessage() {}
+
+func (x *GetUserByEmailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_id_v1_id_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByEmailRequest.ProtoReflect.Descriptor instead.
+func (*GetUserByEmailRequest) Descriptor() ([]byte, []int) {
+	return file_id_v1_id_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetUserByEmailRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type GetUserByEmailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByEmailResponse) Reset() {
+	*x = GetUserByEmailResponse{}
+	mi := &file_id_v1_id_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByEmailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByEmailResponse) ProtoMessage() {}
+
+func (x *GetUserByEmailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_id_v1_id_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByEmailResponse.ProtoReflect.Descriptor instead.
+func (*GetUserByEmailResponse) Descriptor() ([]byte, []int) {
+	return file_id_v1_id_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetUserByEmailResponse) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
 var File_id_v1_id_proto protoreflect.FileDescriptor
 
 const file_id_v1_id_proto_rawDesc = "" +
@@ -721,7 +810,11 @@ const file_id_v1_id_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06avatar\x18\x02 \x01(\fR\x06avatar\x12!\n" +
 	"\fcontent_type\x18\x03 \x01(\tR\vcontentType\"\x16\n" +
-	"\x14UpdateAvatarResponseB8Z6github.com/terjelafton/platform/libs/proto-stubs/id/v1b\x06proto3"
+	"\x14UpdateAvatarResponse\"-\n" +
+	"\x15GetUserByEmailRequest\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"9\n" +
+	"\x16GetUserByEmailResponse\x12\x1f\n" +
+	"\x04user\x18\x01 \x01(\v2\v.id.v1.UserR\x04userB8Z6github.com/terjelafton/platform/libs/proto-stubs/id/v1b\x06proto3"
 
 var (
 	file_id_v1_id_proto_rawDescOnce sync.Once
@@ -735,31 +828,34 @@ func file_id_v1_id_proto_rawDescGZIP() []byte {
 	return file_id_v1_id_proto_rawDescData
 }
 
-var file_id_v1_id_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_id_v1_id_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_id_v1_id_proto_goTypes = []any{
-	(*User)(nil),                  // 0: id.v1.User
-	(*RegisterRequest)(nil),       // 1: id.v1.RegisterRequest
-	(*RegisterResponse)(nil),      // 2: id.v1.RegisterResponse
-	(*LoginRequest)(nil),          // 3: id.v1.LoginRequest
-	(*LoginResponse)(nil),         // 4: id.v1.LoginResponse
-	(*ValidateTokenRequest)(nil),  // 5: id.v1.ValidateTokenRequest
-	(*ValidateTokenResponse)(nil), // 6: id.v1.ValidateTokenResponse
-	(*GetUserRequest)(nil),        // 7: id.v1.GetUserRequest
-	(*GetUserResponse)(nil),       // 8: id.v1.GetUserResponse
-	(*GetAvatarRequest)(nil),      // 9: id.v1.GetAvatarRequest
-	(*GetAvatarResponse)(nil),     // 10: id.v1.GetAvatarResponse
-	(*UpdateAvatarRequest)(nil),   // 11: id.v1.UpdateAvatarRequest
-	(*UpdateAvatarResponse)(nil),  // 12: id.v1.UpdateAvatarResponse
+	(*User)(nil),                   // 0: id.v1.User
+	(*RegisterRequest)(nil),        // 1: id.v1.RegisterRequest
+	(*RegisterResponse)(nil),       // 2: id.v1.RegisterResponse
+	(*LoginRequest)(nil),           // 3: id.v1.LoginRequest
+	(*LoginResponse)(nil),          // 4: id.v1.LoginResponse
+	(*ValidateTokenRequest)(nil),   // 5: id.v1.ValidateTokenRequest
+	(*ValidateTokenResponse)(nil),  // 6: id.v1.ValidateTokenResponse
+	(*GetUserRequest)(nil),         // 7: id.v1.GetUserRequest
+	(*GetUserResponse)(nil),        // 8: id.v1.GetUserResponse
+	(*GetAvatarRequest)(nil),       // 9: id.v1.GetAvatarRequest
+	(*GetAvatarResponse)(nil),      // 10: id.v1.GetAvatarResponse
+	(*UpdateAvatarRequest)(nil),    // 11: id.v1.UpdateAvatarRequest
+	(*UpdateAvatarResponse)(nil),   // 12: id.v1.UpdateAvatarResponse
+	(*GetUserByEmailRequest)(nil),  // 13: id.v1.GetUserByEmailRequest
+	(*GetUserByEmailResponse)(nil), // 14: id.v1.GetUserByEmailResponse
 }
 var file_id_v1_id_proto_depIdxs = []int32{
 	0, // 0: id.v1.RegisterResponse.user:type_name -> id.v1.User
 	0, // 1: id.v1.LoginResponse.user:type_name -> id.v1.User
 	0, // 2: id.v1.GetUserResponse.user:type_name -> id.v1.User
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // 3: id.v1.GetUserByEmailResponse.user:type_name -> id.v1.User
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_id_v1_id_proto_init() }
@@ -773,7 +869,7 @@ func file_id_v1_id_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_id_v1_id_proto_rawDesc), len(file_id_v1_id_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

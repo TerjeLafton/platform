@@ -72,3 +72,12 @@ message UpdateAvatarRequest {
 }
 
 message UpdateAvatarResponse {}
+
+// Get user by email (for sharing lookups)
+message GetUserByEmailRequest {
+  string email = 1;
+}
+
+message GetUserByEmailResponse {
+  User user = 1;
+}

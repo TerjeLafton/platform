@@ -8,6 +8,7 @@ func (h *Handler) Register(nc *nats.Conn) error {
 		"id.auth.login":         h.HandleLogin,
 		"id.auth.validate":      h.HandleValidateToken,
 		"id.user.get":           h.HandleGetUser,
+		"id.user.get_by_email":  h.HandleGetUserByEmail,
 		"id.user.avatar":        h.HandleGetAvatar,
 		"id.user.avatar.update": h.HandleUpdateAvatar,
 	}
