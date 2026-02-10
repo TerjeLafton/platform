@@ -6,6 +6,7 @@ templ Navbar(userID string) {
 			<a href="/" class="text-lg font-semibold text-text-primary">Platform</a>
 			<div class="flex items-center gap-4">
 				{ children... }
+				<a href="/logs" class="text-sm text-text-secondary hover:text-text-primary">Logs</a>
 				<a href="/profile" class="flex items-center">
 					<img src={ "/avatar/" + userID } alt="avatar" class="h-8 w-8 rounded-full object-cover"/>
 				</a>
