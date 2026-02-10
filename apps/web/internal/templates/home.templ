@@ -9,14 +9,21 @@ templ HomePage(userID, name string) {
 				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
 			</form>
 		}
-		@ui.PageWide() {
-			<h1 class="mb-6 text-2xl font-bold">Welcome, { name }</h1>
-			<div class="space-y-3">
-				<a href="/todo" class="flex items-center justify-between rounded-lg border border-border-subtle bg-surface px-4 py-3 text-link hover:text-link-hover">
-					<span class="font-medium">Todo Lists</span>
-					<span class="text-text-muted">&rarr;</span>
+		<div class="mx-auto max-w-4xl px-4 py-24 flex flex-col items-center text-center">
+			<h1 class="text-3xl font-bold text-text-primary mb-2">Welcome back, { name }</h1>
+			<p class="text-text-muted mb-12">What would you like to do?</p>
+			<div class="grid grid-cols-2 gap-6 w-full max-w-md">
+				<a href="/todo/" class="group flex flex-col items-center gap-3 rounded-xl border border-border-subtle bg-surface p-8 hover:border-brand transition-colors">
+					<span class="text-3xl">&#9745;</span>
+					<span class="text-lg font-medium text-text-primary group-hover:text-link">Todo</span>
+					<span class="text-xs text-text-muted">Manage your lists</span>
+				</a>
+				<a href="/logs" class="group flex flex-col items-center gap-3 rounded-xl border border-border-subtle bg-surface p-8 hover:border-brand transition-colors">
+					<span class="text-3xl">&#9776;</span>
+					<span class="text-lg font-medium text-text-primary group-hover:text-link">Logs</span>
+					<span class="text-xs text-text-muted">View system logs</span>
 				</a>
 			</div>
-		}
+		</div>
 	}
 }
