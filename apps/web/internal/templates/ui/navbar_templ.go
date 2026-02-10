@@ -29,7 +29,7 @@ func Navbar(userID string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"border-b border-border-subtle bg-surface\"><div class=\"mx-auto flex max-w-4xl items-center justify-between px-4 py-3\"><a href=\"/\" class=\"text-lg font-semibold text-text-primary\">Platform</a><div class=\"flex items-center gap-4\"><a href=\"/logs\" class=\"text-sm text-text-secondary hover:text-text-primary\">Logs</a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"border-b border-border-subtle bg-surface\"><div class=\"mx-auto flex max-w-4xl items-center justify-between px-4 py-3\"><div class=\"flex items-center gap-6\"><a href=\"/\" class=\"text-lg font-semibold text-text-primary\">Platform</a> <a href=\"/todo/lists\" class=\"text-sm text-text-secondary hover:text-text-primary\">Todo</a> <a href=\"/logs\" class=\"text-sm text-text-secondary hover:text-text-primary\">Logs</a></div><div class=\"flex items-center gap-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,7 +44,7 @@ func Navbar(userID string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("/avatar/" + userID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/ui/navbar.templ`, Line: 11, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/ui/navbar.templ`, Line: 14, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

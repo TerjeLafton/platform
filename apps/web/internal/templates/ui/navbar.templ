@@ -3,9 +3,12 @@ package ui
 templ Navbar(userID string) {
 	<nav class="border-b border-border-subtle bg-surface">
 		<div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-			<a href="/" class="text-lg font-semibold text-text-primary">Platform</a>
-			<div class="flex items-center gap-4">
+			<div class="flex items-center gap-6">
+				<a href="/" class="text-lg font-semibold text-text-primary">Platform</a>
+				<a href="/todo/lists" class="text-sm text-text-secondary hover:text-text-primary">Todo</a>
 				<a href="/logs" class="text-sm text-text-secondary hover:text-text-primary">Logs</a>
+			</div>
+			<div class="flex items-center gap-4">
 				{ children... }
 				<a href="/profile" class="flex items-center">
 					<img src={ "/avatar/" + userID } alt="avatar" class="h-8 w-8 rounded-full object-cover"/>
