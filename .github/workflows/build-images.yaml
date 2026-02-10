@@ -6,7 +6,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/platform
 
 jobs:
   build:
@@ -17,7 +16,12 @@ jobs:
     strategy:
       matrix:
         service: [id, todo, log, web]
+    env:
+      IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/platform
     steps:
+      - name: Lowercase image prefix
+        run: echo "IMAGE_PREFIX=${IMAGE_PREFIX,,}" >> "$GITHUB_ENV"
+
       - uses: actions/checkout@v4
 
       - uses: docker/login-action@v3
