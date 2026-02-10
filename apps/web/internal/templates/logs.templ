@@ -149,7 +149,7 @@ func shortCorrelationID(id string) string {
 
 templ LogEntry(entry *logv1.LogRecord) {
 	<div class="flex gap-3 py-1 px-2 rounded hover:bg-surface items-baseline">
-		<span class="text-text-muted shrink-0 w-20">{ formatTimestamp(entry.Timestamp) }</span>
+		<span class="text-text-muted shrink-0 w-24">{ formatTimestamp(entry.Timestamp) }</span>
 		<span class={ "shrink-0 w-12 font-semibold", levelColor(entry.Level) }>{ entry.Level }</span>
 		<span class="text-text-secondary shrink-0 w-12">{ entry.Service }</span>
 		if entry.Module != "" {
