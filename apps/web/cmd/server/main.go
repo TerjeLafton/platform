@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,14 +13,11 @@ import (
 	"github.com/terjelafton/platform/apps/web/internal/handlers"
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
 	"github.com/terjelafton/platform/apps/web/internal/sse"
+	applogger "github.com/terjelafton/platform/libs/logger"
 )
 
 func main() {
 	cfg := LoadConfig()
-
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	})).With("service", "web")
 
 	nc, err := nats.Connect(cfg.NATSURL)
 	if err != nil {
@@ -29,6 +25,7 @@ func main() {
 	}
 	defer nc.Drain()
 
+	logger := applogger.New(nc, "web")
 	logger.Info("connected to NATS", "server", nc.ConnectedUrl())
 
 	handlerLogger := logger.With("module", "handler")
@@ -77,8 +74,13 @@ func main() {
 	mux.Handle("DELETE /todo/lists/{id}/members/{memberID}", requireAuth(handlers.HandleRemoveListMember(nc, handlerLogger)))
 	mux.Handle("POST /todo/lists/{id}/leave", requireAuth(handlers.HandleLeaveList(nc, handlerLogger)))
 
+	// Wrap mux with middleware (outermost runs first)
+	var handler http.Handler = mux
+	handler = middleware.RequestLog(mwLogger)(handler)
+	handler = middleware.CorrelationID(handler)
+
 	addr := fmt.Sprintf(":%s", cfg.Port)
-	srv := &http.Server{Addr: addr, Handler: mux}
+	srv := &http.Server{Addr: addr, Handler: handler}
 
 	go func() {
 		logger.Info("web service starting", "addr", addr)
