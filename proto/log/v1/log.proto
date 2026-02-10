@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package log.v1;
+
+option go_package = "platform/libs/proto-stubs/log/v1;logv1";
+
+// LogRecord is published to log.ingest (fire-and-forget)
+message LogRecord {
+  string timestamp = 1;
+  string level = 2;
+  string service = 3;
+  string module = 4;
+  string correlation_id = 5;
+  string message = 6;
+  bytes attrs = 7; // JSON blob
+}
+
+// QueryLogsRequest is sent to log.query (request/reply)
+message QueryLogsRequest {
+  string service = 1;
+  string level = 2;
+  string correlation_id = 3;
+  int32 limit = 4;
+  int32 offset = 5;
+}
+
+message QueryLogsResponse {
+  repeated LogRecord logs = 1;
+  int32 total = 2;
+}

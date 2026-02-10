@@ -10,7 +10,8 @@ generate-proto:
     --go_opt=paths=source_relative \
     proto/common/v1/*.proto \
     proto/todo/v1/*.proto \
-    proto/id/v1/*.proto
+    proto/id/v1/*.proto \
+    proto/log/v1/*.proto
 
 generate: generate-proto
   @echo "Generating sqlc..."
