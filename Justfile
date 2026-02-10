@@ -1,6 +1,7 @@
 mod todo "apps/todo"
 mod id "apps/id"
 mod web "apps/web"
+mod log "apps/log"
 
 generate-proto:
   @echo "Generating protobufs..."
@@ -17,6 +18,7 @@ generate: generate-proto
   @echo "Generating sqlc..."
   cd apps/todo && sqlc generate
   cd apps/id && sqlc generate
+  cd apps/log && sqlc generate
   @echo "Generating templ..."
   cd apps/web && templ generate
   @echo "Generating CSS..."
@@ -47,5 +49,6 @@ run-all:
   trap 'kill 0' EXIT
   (cd apps/id && go run ./cmd/server) &
   (cd apps/todo && go run ./cmd/server) &
+  (cd apps/log && go run ./cmd/server) &
   (cd apps/web && go run ./cmd/server) &
   wait

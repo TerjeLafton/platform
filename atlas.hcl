@@ -2,6 +2,7 @@ env "local" {
   src = [
     "apps/todo/db/schema.sql",
     "apps/id/db/schema.sql",
+    "apps/log/db/schema.sql",
   ]
 
   url = "postgres://postgres:postgres@localhost:5432/platform?sslmode=disable"

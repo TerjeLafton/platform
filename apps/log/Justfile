@@ -1,0 +1,8 @@
+generate:
+    sqlc generate
+
+run-server:
+    go run ./cmd/server
+
+run-client:
+    go run ./cmd/client
