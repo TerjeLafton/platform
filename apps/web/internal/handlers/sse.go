@@ -40,7 +40,7 @@ func HandleSSE(nc *nats.Conn, manager *sse.Manager, logger *slog.Logger) http.Ha
 		manager.Register(conn)
 		defer manager.Unregister(conn)
 
-		logger.Info("SSE connection opened", "conn_id", connID, "user_id", userID, "list_id", listID)
+		logger.InfoContext(r.Context(), "SSE connection opened", "conn_id", connID, "user_id", userID, "list_id", listID)
 
 		// Subscribe to NATS events for this list
 		subject := fmt.Sprintf("todo.events.%s.>", listID)
@@ -59,18 +59,18 @@ func HandleSSE(nc *nats.Conn, manager *sse.Manager, logger *slog.Logger) http.Ha
 
 			html, err := renderEventHTML(r.Context(), eventType, msg.Data)
 			if err != nil {
-				logger.Warn("failed to render event", "error", err, "event_type", eventType)
+				logger.WarnContext(r.Context(), "failed to render event", "error", err, "event_type", eventType)
 				return
 			}
 
 			select {
 			case conn.Events <- sse.Event{Name: eventType, Data: html}:
 			default:
-				logger.Warn("SSE event channel full, dropping event", "conn_id", connID)
+				logger.WarnContext(r.Context(), "SSE event channel full, dropping event", "conn_id", connID)
 			}
 		})
 		if err != nil {
-			logger.Error("failed to subscribe to NATS", "error", err, "subject", subject)
+			logger.ErrorContext(r.Context(), "failed to subscribe to NATS", "error", err, "subject", subject)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -87,7 +87,7 @@ func HandleSSE(nc *nats.Conn, manager *sse.Manager, logger *slog.Logger) http.Ha
 				fmt.Fprint(w, "\n")
 				flusher.Flush()
 			case <-r.Context().Done():
-				logger.Info("SSE connection closed", "conn_id", connID, "user_id", userID, "list_id", listID)
+				logger.InfoContext(r.Context(), "SSE connection closed", "conn_id", connID, "user_id", userID, "list_id", listID)
 				return
 			}
 		}

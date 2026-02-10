@@ -16,7 +16,7 @@ func HandleAvatar(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		data, contentType, err := natsclient.GetAvatar(nc, userID, correlationID)
 		if err != nil {
-			logger.Warn("failed to get avatar", "error", err, "user_id", userID)
+			logger.WarnContext(r.Context(), "failed to get avatar", "error", err, "user_id", userID)
 			http.Redirect(w, r, "/static/default-avatar.svg", http.StatusSeeOther)
 			return
 		}

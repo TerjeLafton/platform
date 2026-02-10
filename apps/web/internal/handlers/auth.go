@@ -22,7 +22,7 @@ func HandleLogin(nc *nats.Conn, cookieName string, logger *slog.Logger) http.Han
 
 		token, err := natsclient.Login(nc, email, password, correlationID)
 		if err != nil {
-			logger.Warn("login failed", "email", email, "error", err)
+			logger.WarnContext(r.Context(), "login failed", "email", email, "error", err)
 			templates.LoginPage(err.Error()).Render(r.Context(), w)
 			return
 		}
@@ -60,7 +60,7 @@ func HandleRegister(nc *nats.Conn, cookieName string, logger *slog.Logger) http.
 
 		token, err := natsclient.Register(nc, email, password, name, correlationID)
 		if err != nil {
-			logger.Warn("registration failed", "email", email, "error", err)
+			logger.WarnContext(r.Context(), "registration failed", "email", email, "error", err)
 			templates.RegisterPage(err.Error()).Render(r.Context(), w)
 			return
 		}

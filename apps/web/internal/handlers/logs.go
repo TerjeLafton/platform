@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	"github.com/nats-io/nats.go"
-	applogger "github.com/terjelafton/platform/libs/logger"
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
 	"github.com/terjelafton/platform/apps/web/internal/natsclient"
 	"github.com/terjelafton/platform/apps/web/internal/templates"
+	applogger "github.com/terjelafton/platform/libs/logger"
 )
 
 func HandleLogsPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
@@ -32,7 +32,7 @@ func HandleLogsPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		logs, total, err := natsclient.QueryLogs(nc, serviceFilter, levelFilter, corrFilter, limit, offset, correlationID)
 		if err != nil {
-			logger.Error("failed to query logs", "error", err)
+			logger.ErrorContext(r.Context(), "failed to query logs", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load logs", http.StatusInternalServerError)
 			return
 		}

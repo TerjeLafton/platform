@@ -16,6 +16,12 @@ func (w *statusWriter) WriteHeader(code int) {
 	w.ResponseWriter.WriteHeader(code)
 }
 
+func (w *statusWriter) Flush() {
+	if f, ok := w.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
 // RequestLog logs the start and completion of each HTTP request.
 // Must run after CorrelationID middleware so the correlation ID is in context.
 func RequestLog(log *slog.Logger) func(http.Handler) http.Handler {

@@ -29,7 +29,7 @@ func Navbar(userID string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"border-b border-border-subtle bg-surface\"><div class=\"mx-auto flex max-w-4xl items-center justify-between px-4 py-3\"><a href=\"/\" class=\"text-lg font-semibold text-text-primary\">Platform</a><div class=\"flex items-center gap-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"border-b border-border-subtle bg-surface\"><div class=\"mx-auto flex max-w-4xl items-center justify-between px-4 py-3\"><a href=\"/\" class=\"text-lg font-semibold text-text-primary\">Platform</a><div class=\"flex items-center gap-4\"><a href=\"/logs\" class=\"text-sm text-text-secondary hover:text-text-primary\">Logs</a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -37,7 +37,7 @@ func Navbar(userID string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<a href=\"/logs\" class=\"text-sm text-text-secondary hover:text-text-primary\">Logs</a> <a href=\"/profile\" class=\"flex items-center\"><img src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<a href=\"/profile\" class=\"flex items-center\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

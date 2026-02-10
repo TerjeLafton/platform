@@ -33,9 +33,9 @@ func RequireAuth(nc *nats.Conn, cookieName string, logger *slog.Logger) func(htt
 			userID, err := natsclient.ValidateToken(nc, cookie.Value, correlationID)
 			if err != nil {
 				if _, ok := err.(*natsclient.ServiceError); ok {
-					logger.Info("invalid token, redirecting to login")
+					logger.InfoContext(r.Context(), "invalid token, redirecting to login")
 				} else {
-					logger.Error("failed to validate token", "error", err)
+					logger.ErrorContext(r.Context(), "failed to validate token", "error", err)
 				}
 
 				http.SetCookie(w, &http.Cookie{

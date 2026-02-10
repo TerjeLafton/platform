@@ -19,7 +19,7 @@ func HandleProfilePage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		user, err := natsclient.GetUser(nc, userID, correlationID)
 		if err != nil {
-			logger.Error("failed to get user", "error", err, "user_id", userID)
+			logger.ErrorContext(r.Context(), "failed to get user", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load profile", http.StatusInternalServerError)
 			return
 		}
@@ -37,7 +37,7 @@ func HandleUploadAvatar(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		file, header, err := r.FormFile("avatar")
 		if err != nil {
-			logger.Warn("failed to read avatar upload", "error", err, "user_id", userID)
+			logger.WarnContext(r.Context(), "failed to read avatar upload", "error", err, "user_id", userID)
 			user, _ := natsclient.GetUser(nc, userID, correlationID)
 			name, email := "", ""
 			if user != nil {
@@ -52,7 +52,7 @@ func HandleUploadAvatar(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		data, err := io.ReadAll(file)
 		if err != nil {
-			logger.Warn("failed to read avatar data", "error", err, "user_id", userID)
+			logger.WarnContext(r.Context(), "failed to read avatar data", "error", err, "user_id", userID)
 			user, _ := natsclient.GetUser(nc, userID, correlationID)
 			name, email := "", ""
 			if user != nil {
@@ -63,7 +63,7 @@ func HandleUploadAvatar(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 		}
 
 		if err := natsclient.UpdateAvatar(nc, userID, data, contentType, correlationID); err != nil {
-			logger.Warn("failed to update avatar", "error", err, "user_id", userID)
+			logger.WarnContext(r.Context(), "failed to update avatar", "error", err, "user_id", userID)
 			user, _ := natsclient.GetUser(nc, userID, correlationID)
 			name, email := "", ""
 			if user != nil {

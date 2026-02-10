@@ -16,17 +16,12 @@ func (h *Handler) HandleQueryLogs(msg *nats.Msg) {
 		return
 	}
 
-	limit := req.Limit
-	if limit <= 0 || limit > 100 {
-		limit = 50
-	}
-
 	entries, total, err := h.service.QueryLogs(
 		context.Background(),
 		req.Service,
 		req.Level,
 		req.CorrelationId,
-		limit,
+		req.Limit,
 		req.Offset,
 	)
 	if err != nil {
