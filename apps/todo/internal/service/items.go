@@ -37,13 +37,13 @@ func (s *Service) CreateItem(
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID, "user_id", userID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.InfoContext(ctx,"item created", "item_id", item.ID, "list_id", listID, "user_id", userID)
+	s.logger.InfoContext(ctx, "item created", "item_id", item.ID, "list_id", listID, "user_id", userID)
 
-	s.publishItemEvent(item.ListID.String(), "item.created", correlationID, &todov1.Item{
+	s.publishItemEvent(ctx, item.ListID.String(), "item.created", correlationID, &todov1.Item{
 		Id:        item.ID.String(),
 		ListId:    item.ListID.String(),
 		Title:     item.Title,
@@ -65,11 +65,11 @@ func (s *Service) GetAllItemsFromList(
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID, "user_id", userID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.InfoContext(ctx,"items retrieved", "list_id", listID, "user_id", userID, "count", len(items))
+	s.logger.InfoContext(ctx, "items retrieved", "list_id", listID, "user_id", userID, "count", len(items))
 
 	return items, nil
 }
@@ -85,13 +85,13 @@ func (s *Service) ToggleItemCompleted(
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "item_id", itemID, "user_id", userID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "item_id", itemID, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.InfoContext(ctx,"item toggled", "item_id", itemID, "user_id", userID, "completed", item.Completed)
+	s.logger.InfoContext(ctx, "item toggled", "item_id", itemID, "user_id", userID, "completed", item.Completed)
 
-	s.publishItemEvent(item.ListID.String(), "item.toggled", correlationID, &todov1.Item{
+	s.publishItemEvent(ctx, item.ListID.String(), "item.toggled", correlationID, &todov1.Item{
 		Id:        item.ID.String(),
 		ListId:    item.ListID.String(),
 		Title:     item.Title,
@@ -109,13 +109,13 @@ func (s *Service) DeleteItem(ctx context.Context, itemID, userID, listID uuid.UU
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "item_id", itemID, "user_id", userID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "item_id", itemID, "user_id", userID)
 		return translateDBError(err)
 	}
 
-	s.logger.InfoContext(ctx,"item deleted", "item_id", itemID, "user_id", userID)
+	s.logger.InfoContext(ctx, "item deleted", "item_id", itemID, "user_id", userID)
 
-	s.publishItemEvent(listID.String(), "item.deleted", correlationID, &todov1.ItemDeletedEvent{
+	s.publishItemEvent(ctx, listID.String(), "item.deleted", correlationID, &todov1.ItemDeletedEvent{
 		ListId: listID.String(),
 		ItemId: itemID.String(),
 	})
@@ -123,10 +123,10 @@ func (s *Service) DeleteItem(ctx context.Context, itemID, userID, listID uuid.UU
 	return nil
 }
 
-func (s *Service) publishItemEvent(listID, eventType, correlationID string, msg proto.Message) {
+func (s *Service) publishItemEvent(ctx context.Context, listID, eventType, correlationID string, msg proto.Message) {
 	data, err := proto.Marshal(msg)
 	if err != nil {
-		s.logger.Error("failed to marshal event", "error", err, "list_id", listID, "event_type", eventType)
+		s.logger.ErrorContext(ctx, "failed to marshal event", "error", err, "list_id", listID, "event_type", eventType)
 		return
 	}
 
@@ -140,8 +140,8 @@ func (s *Service) publishItemEvent(listID, eventType, correlationID string, msg 
 	}
 
 	if err := s.nc.PublishMsg(natsMsg); err != nil {
-		s.logger.Warn("failed to publish event", "error", err, "list_id", listID, "event_type", eventType)
+		s.logger.WarnContext(ctx, "failed to publish event", "error", err, "list_id", listID, "event_type", eventType)
 	} else {
-		s.logger.Info("event published", "subject", natsMsg.Subject, "list_id", listID)
+		s.logger.InfoContext(ctx, "event published", "subject", natsMsg.Subject, "list_id", listID)
 	}
 }

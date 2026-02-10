@@ -33,14 +33,13 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to connect to NATS:", err)
 	}
+	logger := applogger.New(nc, "todo")
+
 	defer func() {
-		logger := applogger.New(nc, "todo")
 		logger.Info("draining NATS connection...")
 		nc.Drain()
 		logger.Info("todo service stopped")
 	}()
-
-	logger := applogger.New(nc, "todo")
 
 	queries := db.New(dbConn)
 	logger.Info("connected to database")

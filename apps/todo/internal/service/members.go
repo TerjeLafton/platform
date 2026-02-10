@@ -27,7 +27,7 @@ func (s *Service) AddListMember(
 	// Verify requesting user is the list owner
 	ownerID, err := s.queries.GetListOwner(ctx, listID)
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID)
 		return nil, translateDBError(err)
 	}
 	if ownerID != ownerUserID {
@@ -35,14 +35,14 @@ func (s *Service) AddListMember(
 	}
 
 	// Look up the member by email via id service
-	user, err := s.getUserByEmail(memberEmail)
+	user, err := s.getUserByEmail(ctx, memberEmail)
 	if err != nil {
 		return nil, err
 	}
 
 	memberUserID, err := uuid.Parse(user.Id)
 	if err != nil {
-		s.logger.ErrorContext(ctx,"invalid user ID from id service", "error", err, "user_id", user.Id)
+		s.logger.ErrorContext(ctx, "invalid user ID from id service", "error", err, "user_id", user.Id)
 		return nil, fmt.Errorf("internal error")
 	}
 
@@ -58,11 +58,11 @@ func (s *Service) AddListMember(
 		Email:  user.Email,
 	})
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID, "member_user_id", memberUserID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID, "member_user_id", memberUserID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.InfoContext(ctx,"member added to list", "list_id", listID, "member_user_id", memberUserID, "owner_user_id", ownerUserID)
+	s.logger.InfoContext(ctx, "member added to list", "list_id", listID, "member_user_id", memberUserID, "owner_user_id", ownerUserID)
 
 	return &member, nil
 }
@@ -73,7 +73,7 @@ func (s *Service) RemoveListMember(
 ) error {
 	ownerID, err := s.queries.GetListOwner(ctx, listID)
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID)
 		return translateDBError(err)
 	}
 
@@ -84,7 +84,7 @@ func (s *Service) RemoveListMember(
 			UserID: memberUserID,
 		})
 		if err != nil {
-			s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID)
+			s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID)
 			return translateDBError(err)
 		}
 		if !isMember {
@@ -101,11 +101,11 @@ func (s *Service) RemoveListMember(
 		ListID: listID,
 		UserID: memberUserID,
 	}); err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID, "member_user_id", memberUserID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID, "member_user_id", memberUserID)
 		return translateDBError(err)
 	}
 
-	s.logger.InfoContext(ctx,"member removed from list", "list_id", listID, "member_user_id", memberUserID, "requested_by", requestingUserID)
+	s.logger.InfoContext(ctx, "member removed from list", "list_id", listID, "member_user_id", memberUserID, "requested_by", requestingUserID)
 
 	return nil
 }
@@ -117,7 +117,7 @@ func (s *Service) GetListMembers(
 	// Verify user is owner or member
 	ownerID, err := s.queries.GetListOwner(ctx, listID)
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID)
 		return nil, translateDBError(err)
 	}
 
@@ -127,7 +127,7 @@ func (s *Service) GetListMembers(
 			UserID: userID,
 		})
 		if err != nil {
-			s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID)
+			s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID)
 			return nil, translateDBError(err)
 		}
 		if !isMember {
@@ -137,27 +137,27 @@ func (s *Service) GetListMembers(
 
 	members, err := s.queries.GetListMembers(ctx, listID)
 	if err != nil {
-		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.InfoContext(ctx,"members retrieved", "list_id", listID, "count", len(members))
+	s.logger.InfoContext(ctx, "members retrieved", "list_id", listID, "count", len(members))
 
 	return members, nil
 }
 
 // getUserByEmail calls the id service via NATS to look up a user by email.
-func (s *Service) getUserByEmail(email string) (*idv1.User, error) {
+func (s *Service) getUserByEmail(ctx context.Context, email string) (*idv1.User, error) {
 	req := &idv1.GetUserByEmailRequest{Email: email}
 	data, err := proto.Marshal(req)
 	if err != nil {
-		s.logger.Error("failed to marshal request", "error", err)
+		s.logger.ErrorContext(ctx, "failed to marshal request", "error", err)
 		return nil, fmt.Errorf("internal error")
 	}
 
 	msg, err := s.nc.Request("id.user.get_by_email", data, 5*time.Second)
 	if err != nil {
-		s.logger.Error("NATS request failed", "error", err, "subject", "id.user.get_by_email")
+		s.logger.ErrorContext(ctx, "NATS request failed", "error", err, "subject", "id.user.get_by_email")
 		return nil, fmt.Errorf("internal error")
 	}
 
