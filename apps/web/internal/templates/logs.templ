@@ -92,10 +92,20 @@ templ LogsPage(userID string, logs []*logv1.LogRecord, total int32, page int, se
 			if len(logs) == 0 {
 				<p class="py-8 text-center text-text-muted">No logs found.</p>
 			} else {
-				<div class="space-y-1 font-mono text-sm">
-					for _, entry := range logs {
-						@LogEntry(entry)
-					}
+				<div class="font-mono text-sm">
+					<div class="flex gap-3 py-1 px-2 border-b border-border-subtle text-xs text-text-muted uppercase tracking-wide">
+						<span class="shrink-0 w-24">Time</span>
+						<span class="shrink-0 w-12">Level</span>
+						<span class="shrink-0 w-12">Service</span>
+						<span class="shrink-0 w-20">Module</span>
+						<span class="flex-1">Message</span>
+						<span class="shrink-0 text-xs">Corr.</span>
+					</div>
+					<div class="space-y-1 mt-1">
+						for _, entry := range logs {
+							@LogEntry(entry)
+						}
+					</div>
 				</div>
 			}
 			if total > int32(page*50) {
