@@ -1,0 +1,169 @@
+package templates
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/terjelafton/platform/apps/web/internal/templates/ui"
+	logv1 "github.com/terjelafton/platform/libs/proto-stubs/log/v1"
+)
+
+func isSelected(filter, value string) bool {
+	return filter == value
+}
+
+templ LogsPage(userID string, logs []*logv1.LogRecord, total int32, page int, serviceFilter, levelFilter, corrFilter string) {
+	@Layout("Logs") {
+		@ui.Navbar(userID) {
+			<form method="POST" action="/logout">
+				<button type="submit" class="text-sm text-text-secondary hover:text-text-primary cursor-pointer">Logout</button>
+			</form>
+		}
+		@ui.PageWide() {
+			<div class="mb-6">
+				<h1 class="text-2xl font-bold mb-4">Logs</h1>
+				<form method="GET" action="/logs" class="flex flex-wrap gap-3 items-end">
+					<div>
+						<label class="block text-xs text-text-muted mb-1">Service</label>
+						<select name="service" class="rounded border border-input-border bg-input-bg px-3 py-1.5 text-sm text-text-primary">
+							<option value="">All</option>
+							if isSelected(serviceFilter, "web") {
+								<option value="web" selected>web</option>
+							} else {
+								<option value="web">web</option>
+							}
+							if isSelected(serviceFilter, "id") {
+								<option value="id" selected>id</option>
+							} else {
+								<option value="id">id</option>
+							}
+							if isSelected(serviceFilter, "todo") {
+								<option value="todo" selected>todo</option>
+							} else {
+								<option value="todo">todo</option>
+							}
+							if isSelected(serviceFilter, "log") {
+								<option value="log" selected>log</option>
+							} else {
+								<option value="log">log</option>
+							}
+						</select>
+					</div>
+					<div>
+						<label class="block text-xs text-text-muted mb-1">Level</label>
+						<select name="level" class="rounded border border-input-border bg-input-bg px-3 py-1.5 text-sm text-text-primary">
+							<option value="">All</option>
+							if isSelected(levelFilter, "INFO") {
+								<option value="INFO" selected>INFO</option>
+							} else {
+								<option value="INFO">INFO</option>
+							}
+							if isSelected(levelFilter, "WARN") {
+								<option value="WARN" selected>WARN</option>
+							} else {
+								<option value="WARN">WARN</option>
+							}
+							if isSelected(levelFilter, "ERROR") {
+								<option value="ERROR" selected>ERROR</option>
+							} else {
+								<option value="ERROR">ERROR</option>
+							}
+						</select>
+					</div>
+					<div>
+						<label class="block text-xs text-text-muted mb-1">Correlation ID</label>
+						<input type="text" name="correlation_id" value={ corrFilter } placeholder="Filter by correlation ID" class="rounded border border-input-border bg-input-bg px-3 py-1.5 text-sm text-text-primary w-72"/>
+					</div>
+					<button type="submit" class="rounded bg-brand px-4 py-1.5 text-sm font-medium text-brand-text hover:bg-brand-hover">Filter</button>
+					if serviceFilter != "" || levelFilter != "" || corrFilter != "" {
+						<a href="/logs" class="text-sm text-link hover:underline">Clear</a>
+					}
+				</form>
+			</div>
+			if corrFilter != "" {
+				<div class="text-sm text-text-muted mb-3">
+					{ fmt.Sprintf("%d logs for correlation", total) } <code class="text-text-secondary">{ corrFilter }</code>
+				</div>
+			} else {
+				<div class="text-sm text-text-muted mb-3">
+					{ fmt.Sprintf("%d logs", total) }
+				</div>
+			}
+			if len(logs) == 0 {
+				<p class="py-8 text-center text-text-muted">No logs found.</p>
+			} else {
+				<div class="space-y-1 font-mono text-sm">
+					for _, entry := range logs {
+						@LogEntry(entry)
+					}
+				</div>
+			}
+			if total > int32(page*50) {
+				<div class="mt-4 flex justify-center">
+					<a
+						href={ templ.SafeURL(fmt.Sprintf("/logs?page=%d&service=%s&level=%s&correlation_id=%s", page+1, serviceFilter, levelFilter, corrFilter)) }
+						class="text-sm text-link hover:underline"
+					>
+						Load more
+					</a>
+				</div>
+			}
+		}
+	}
+}
+
+func levelColor(level string) string {
+	switch strings.ToUpper(level) {
+	case "ERROR":
+		return "text-error-text"
+	case "WARN":
+		return "text-yellow-400"
+	default:
+		return "text-text-muted"
+	}
+}
+
+func formatTimestamp(ts string) string {
+	// Timestamp comes as RFC3339Nano, show just time portion
+	if idx := strings.Index(ts, "T"); idx >= 0 {
+		t := ts[idx+1:]
+		if dotIdx := strings.Index(t, "."); dotIdx >= 0 {
+			// Keep milliseconds only
+			end := dotIdx + 4
+			if end > len(t) {
+				end = len(t)
+			}
+			return t[:end]
+		}
+		return t
+	}
+	return ts
+}
+
+func shortCorrelationID(id string) string {
+	if len(id) > 8 {
+		return id[:8]
+	}
+	return id
+}
+
+templ LogEntry(entry *logv1.LogRecord) {
+	<div class="flex gap-3 py-1 px-2 rounded hover:bg-surface items-baseline">
+		<span class="text-text-muted shrink-0 w-20">{ formatTimestamp(entry.Timestamp) }</span>
+		<span class={ "shrink-0 w-12 font-semibold", levelColor(entry.Level) }>{ entry.Level }</span>
+		<span class="text-text-secondary shrink-0 w-12">{ entry.Service }</span>
+		if entry.Module != "" {
+			<span class="text-text-muted shrink-0 w-20">{ entry.Module }</span>
+		}
+		<span class="text-text-primary flex-1 truncate">{ entry.Message }</span>
+		if entry.CorrelationId != "" {
+			<a
+				href={ templ.SafeURL(fmt.Sprintf("/logs?correlation_id=%s", entry.CorrelationId)) }
+				class="text-link hover:underline shrink-0 text-xs"
+				title={ entry.CorrelationId }
+			>
+				{ shortCorrelationID(entry.CorrelationId) }
+			</a>
+		}
+	</div>
+}

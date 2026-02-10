@@ -73,6 +73,7 @@ func main() {
 	mux.Handle("POST /todo/lists/{id}/members", requireAuth(handlers.HandleAddListMember(nc, handlerLogger)))
 	mux.Handle("DELETE /todo/lists/{id}/members/{memberID}", requireAuth(handlers.HandleRemoveListMember(nc, handlerLogger)))
 	mux.Handle("POST /todo/lists/{id}/leave", requireAuth(handlers.HandleLeaveList(nc, handlerLogger)))
+	mux.Handle("GET /logs", requireAuth(handlers.HandleLogsPage(nc, handlerLogger)))
 
 	// Wrap mux with middleware (outermost runs first)
 	var handler http.Handler = mux
