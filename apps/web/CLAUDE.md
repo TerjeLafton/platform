@@ -6,18 +6,18 @@ Server-rendered Go frontend using templ (HTML templates), Tailwind v4, and HTMX.
 
 ```bash
 just generate        # Rebuild templ + CSS (run after template changes)
-just run-server      # Start on :8080 (needs NATS, id, and todo services)
+just run-server      # Start on :8080 (needs NATS, id, todo, and log services)
 just css-watch       # Auto-rebuild CSS during development
 ```
 
-Or from the repo root: `just run-all` starts all three services.
+Or from the repo root: `just run-all` starts all four services.
 
 ## Architecture
 
-The web service is a thin frontend — it owns no database. All data flows through NATS to backend services (id, todo).
+The web service is a thin frontend — it owns no database. All data flows through NATS to backend services (id, todo, log).
 
 ```
-Handler (net/http) → NATSClient → id/todo services
+Handler (net/http) → NATSClient → id/todo/log services
 ```
 
 - **Handlers** (`internal/handlers/`) — HTTP handlers, form parsing, render templates

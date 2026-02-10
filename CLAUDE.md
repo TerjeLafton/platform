@@ -2,7 +2,7 @@
 
 ## Architecture
 
-**Backend services (todo, id) — 3-Layer Design:**
+**Backend services (id, todo, log) — 3-Layer Design:**
 - **Handler** (NATS) - Request/response, protobuf marshaling
 - **Service** - Business logic, validation, orchestration
 - **Data** (sqlc) - Database queries
@@ -88,10 +88,19 @@ apps/
       schema.sql      # Users table
       queries.sql     # User queries
     .env              # JWT_SECRET, DB config
+  log/                # Log service
+    cmd/server/       # Production entrypoint
+    internal/
+      db/             # sqlc generated
+      service/        # Log ingestion + querying
+      handlers/nats/  # NATS handlers
+    db/
+      schema.sql      # Logs table
+      queries.sql     # Log queries
   web/                # Web frontend (no database)
     cmd/server/       # Production entrypoint
     internal/
-      handlers/       # HTTP handlers (auth, todo)
+      handlers/       # HTTP handlers (auth, todo, logs)
       middleware/      # Auth middleware
       natsclient/     # NATS request/reply wrappers
       templates/      # Templ pages
@@ -100,8 +109,9 @@ apps/
 
 proto/
   common/v1/          # Shared messages (ErrorResponse)
-  todo/v1/            # Todo protobuf definitions
   id/v1/              # Auth protobuf definitions
+  todo/v1/            # Todo protobuf definitions
+  log/v1/             # Log protobuf definitions
 libs/proto-stubs/     # Generated Go code (committed)
 migrations/           # Atlas migrations (all services)
 ```
@@ -112,12 +122,13 @@ migrations/           # Atlas migrations (all services)
 # Start infrastructure and migrations
 just compose-up && sleep 3 && just migrate-apply
 
-# Run all services (id + todo + web on :8080)
+# Run all services (id + todo + log + web on :8080)
 just run-all
 
 # Or run individually
 cd apps/id && just run-server      # Auth service
 cd apps/todo && just run-server    # Todo service
+cd apps/log && just run-server     # Log service
 cd apps/web && just run-server     # Web frontend (:8080)
 
 # Test backend services

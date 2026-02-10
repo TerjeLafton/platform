@@ -20,15 +20,10 @@ services:
     image: docker.io/nats:2.12.4-alpine
     container_name: nats
     ports:
-      - "4222:4222"  # Client connections
-      - "8222:8222"  # HTTP management/monitoring
-      - "6222:6222"  # Cluster routes
+      - "4222:4222"
+      - "8222:8222"
     command:
-      - "--jetstream"           # Enable JetStream for persistence
-      - "--store_dir=/data"     # JetStream storage directory
-      - "--http_port=8222"      # Enable monitoring
-    volumes:
-      - nats_data:/data
+      - "--http_port=8222"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
       interval: 10s
@@ -37,4 +32,3 @@ services:
 
 volumes:
   postgres_data:
-  nats_data:
