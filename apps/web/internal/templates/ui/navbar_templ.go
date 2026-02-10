@@ -29,7 +29,7 @@ func Navbar(userID string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"border-b border-border-subtle bg-surface\"><div class=\"mx-auto flex max-w-4xl items-center justify-between px-4 py-3\"><div class=\"flex items-center gap-6\"><a href=\"/\" class=\"text-lg font-semibold text-text-primary\">Platform</a> <a href=\"/todo/lists\" class=\"text-sm text-text-secondary hover:text-text-primary\">Todo</a> <a href=\"/logs\" class=\"text-sm text-text-secondary hover:text-text-primary\">Logs</a></div><div class=\"flex items-center gap-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"border-b border-border-subtle bg-surface\"><div class=\"mx-auto flex max-w-4xl items-center justify-between px-4 py-3\"><div class=\"flex items-center gap-6\"><a href=\"/\" class=\"text-lg font-semibold text-text-primary\">Platform</a> <a href=\"/todo/\" class=\"text-sm text-text-secondary hover:text-text-primary\">Todo</a> <a href=\"/logs\" class=\"text-sm text-text-secondary hover:text-text-primary\">Logs</a></div><div class=\"flex items-center gap-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
