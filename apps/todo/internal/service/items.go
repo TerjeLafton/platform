@@ -37,11 +37,11 @@ func (s *Service) CreateItem(
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.Error("database error", "error", err, "list_id", listID, "user_id", userID)
+		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.Info("item created", "item_id", item.ID, "list_id", listID, "user_id", userID)
+	s.logger.InfoContext(ctx,"item created", "item_id", item.ID, "list_id", listID, "user_id", userID)
 
 	s.publishItemEvent(item.ListID.String(), "item.created", correlationID, &todov1.Item{
 		Id:        item.ID.String(),
@@ -65,11 +65,11 @@ func (s *Service) GetAllItemsFromList(
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.Error("database error", "error", err, "list_id", listID, "user_id", userID)
+		s.logger.ErrorContext(ctx,"database error", "error", err, "list_id", listID, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.Info("items retrieved", "list_id", listID, "user_id", userID, "count", len(items))
+	s.logger.InfoContext(ctx,"items retrieved", "list_id", listID, "user_id", userID, "count", len(items))
 
 	return items, nil
 }
@@ -85,11 +85,11 @@ func (s *Service) ToggleItemCompleted(
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.Error("database error", "error", err, "item_id", itemID, "user_id", userID)
+		s.logger.ErrorContext(ctx,"database error", "error", err, "item_id", itemID, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.Info("item toggled", "item_id", itemID, "user_id", userID, "completed", item.Completed)
+	s.logger.InfoContext(ctx,"item toggled", "item_id", itemID, "user_id", userID, "completed", item.Completed)
 
 	s.publishItemEvent(item.ListID.String(), "item.toggled", correlationID, &todov1.Item{
 		Id:        item.ID.String(),
@@ -109,11 +109,11 @@ func (s *Service) DeleteItem(ctx context.Context, itemID, userID, listID uuid.UU
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.Error("database error", "error", err, "item_id", itemID, "user_id", userID)
+		s.logger.ErrorContext(ctx,"database error", "error", err, "item_id", itemID, "user_id", userID)
 		return translateDBError(err)
 	}
 
-	s.logger.Info("item deleted", "item_id", itemID, "user_id", userID)
+	s.logger.InfoContext(ctx,"item deleted", "item_id", itemID, "user_id", userID)
 
 	s.publishItemEvent(listID.String(), "item.deleted", correlationID, &todov1.ItemDeletedEvent{
 		ListId: listID.String(),

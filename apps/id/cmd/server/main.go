@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"log"
-	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,14 +12,11 @@ import (
 	"github.com/terjelafton/platform/apps/id/internal/db"
 	natshandlers "github.com/terjelafton/platform/apps/id/internal/handlers/nats"
 	"github.com/terjelafton/platform/apps/id/internal/service"
+	applogger "github.com/terjelafton/platform/libs/logger"
 )
 
 func main() {
 	cfg := LoadConfig()
-
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	})).With("service", "id")
 
 	dbConn, err := sql.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
@@ -32,14 +28,16 @@ func main() {
 		log.Fatal("failed to ping database:", err)
 	}
 
-	queries := db.New(dbConn)
-	logger.Info("connected to database")
-
 	nc, err := nats.Connect(cfg.NATSURL)
 	if err != nil {
 		log.Fatal("failed to connect to NATS:", err)
 	}
 	defer nc.Drain()
+
+	logger := applogger.New(nc, "id")
+
+	queries := db.New(dbConn)
+	logger.Info("connected to database")
 
 	logger.Info("connected to NATS", "server", nc.ConnectedUrl())
 

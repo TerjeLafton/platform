@@ -6,26 +6,30 @@ import (
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"github.com/terjelafton/platform/apps/id/internal/service"
+	applogger "github.com/terjelafton/platform/libs/logger"
 	idv1 "github.com/terjelafton/platform/libs/proto-stubs/id/v1"
 	"google.golang.org/protobuf/proto"
 )
 
 func (h *Handler) HandleRegister(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req idv1.RegisterRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal register request", "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal register request", "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
-	user, token, err := h.service.Register(context.Background(), req.Email, req.Password, req.Name)
+	user, token, err := h.service.Register(ctx, req.Email, req.Password, req.Name)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
-			h.logger.Warn("validation failed", "field", valErr.Field, "error", valErr.Message)
+			h.logger.WarnContext(ctx, "validation failed", "field", valErr.Field, "error", valErr.Message)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Error())
 			return
 		}
-		h.logger.Error("registration failed", "error", err)
+		h.logger.ErrorContext(ctx, "registration failed", "error", err)
 		h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		return
 	}
@@ -44,26 +48,29 @@ func (h *Handler) HandleRegister(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleLogin(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req idv1.LoginRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal login request", "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal login request", "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
-	user, token, err := h.service.Login(context.Background(), req.Email, req.Password)
+	user, token, err := h.service.Login(ctx, req.Email, req.Password)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
-			h.logger.Warn("validation failed", "field", valErr.Field, "error", valErr.Message)
+			h.logger.WarnContext(ctx, "validation failed", "field", valErr.Field, "error", valErr.Message)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Error())
 			return
 		}
 		if authErr, ok := err.(*service.AuthError); ok {
-			h.logger.Warn("authentication failed", "error", authErr.Message)
+			h.logger.WarnContext(ctx, "authentication failed", "error", authErr.Message)
 			h.respondError(msg, "AUTH_ERROR", authErr.Error())
 			return
 		}
-		h.logger.Error("login failed", "error", err)
+		h.logger.ErrorContext(ctx, "login failed", "error", err)
 		h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		return
 	}
@@ -82,16 +89,19 @@ func (h *Handler) HandleLogin(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleValidateToken(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req idv1.ValidateTokenRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal validate request", "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal validate request", "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	userID, err := h.service.ValidateToken(req.Token)
 	if err != nil {
-		h.logger.Warn("token validation failed", "error", err)
+		h.logger.WarnContext(ctx, "token validation failed", "error", err)
 		h.respondError(msg, "AUTH_ERROR", "Invalid or expired token")
 		return
 	}
@@ -100,25 +110,28 @@ func (h *Handler) HandleValidateToken(msg *nats.Msg) {
 		UserId: userID.String(),
 	}
 
-	h.logger.Info("token validated", "user_id", userID)
+	h.logger.InfoContext(ctx, "token validated", "user_id", userID)
 	h.respondSuccess(msg, resp)
 }
 
 func (h *Handler) HandleGetUserByEmail(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req idv1.GetUserByEmailRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal get user by email request", "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal get user by email request", "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
-	user, err := h.service.GetUserByEmail(context.Background(), req.Email)
+	user, err := h.service.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 			return
 		}
-		h.logger.Error("failed to get user by email", "error", err)
+		h.logger.ErrorContext(ctx, "failed to get user by email", "error", err)
 		h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		return
 	}
@@ -134,23 +147,26 @@ func (h *Handler) HandleGetUserByEmail(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleGetUser(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req idv1.GetUserRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal get user request", "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal get user request", "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user ID", "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user ID", "user_id", req.UserId)
 		h.respondError(msg, "VALIDATION_ERROR", "Invalid user ID")
 		return
 	}
 
-	user, err := h.service.GetUser(context.Background(), userID)
+	user, err := h.service.GetUser(ctx, userID)
 	if err != nil {
-		h.logger.Error("failed to get user", "error", err, "user_id", req.UserId)
+		h.logger.ErrorContext(ctx, "failed to get user", "error", err, "user_id", req.UserId)
 		h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		return
 	}

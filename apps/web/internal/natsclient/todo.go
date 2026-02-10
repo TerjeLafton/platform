@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func CreateList(nc *nats.Conn, userID, title string) (*todov1.List, error) {
+func CreateList(nc *nats.Conn, userID, title, correlationID string) (*todov1.List, error) {
 	req := &todov1.CreateListRequest{
 		UserId: userID,
 		Title:  title,
@@ -19,7 +19,7 @@ func CreateList(nc *nats.Conn, userID, title string) (*todov1.List, error) {
 		return nil, fmt.Errorf("marshal create list request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.list.create", data, requestTimeout)
+	msg, err := request(nc, "todo.list.create", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -36,7 +36,7 @@ func CreateList(nc *nats.Conn, userID, title string) (*todov1.List, error) {
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func GetListsByUser(nc *nats.Conn, userID string) ([]*todov1.List, error) {
+func GetListsByUser(nc *nats.Conn, userID, correlationID string) ([]*todov1.List, error) {
 	req := &todov1.GetListsByUserRequest{
 		UserId: userID,
 	}
@@ -46,7 +46,7 @@ func GetListsByUser(nc *nats.Conn, userID string) ([]*todov1.List, error) {
 		return nil, fmt.Errorf("marshal get lists request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.list.get_by_user", data, requestTimeout)
+	msg, err := request(nc, "todo.list.get_by_user", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -63,7 +63,7 @@ func GetListsByUser(nc *nats.Conn, userID string) ([]*todov1.List, error) {
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func UpdateListTitle(nc *nats.Conn, id, userID, title string) (*todov1.List, error) {
+func UpdateListTitle(nc *nats.Conn, id, userID, title, correlationID string) (*todov1.List, error) {
 	req := &todov1.UpdateListTitleRequest{
 		Id:     id,
 		UserId: userID,
@@ -75,7 +75,7 @@ func UpdateListTitle(nc *nats.Conn, id, userID, title string) (*todov1.List, err
 		return nil, fmt.Errorf("marshal update list title request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.list.update_title", data, requestTimeout)
+	msg, err := request(nc, "todo.list.update_title", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -92,7 +92,7 @@ func UpdateListTitle(nc *nats.Conn, id, userID, title string) (*todov1.List, err
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func DeleteList(nc *nats.Conn, id, userID string) error {
+func DeleteList(nc *nats.Conn, id, userID, correlationID string) error {
 	req := &todov1.DeleteListRequest{
 		Id:     id,
 		UserId: userID,
@@ -103,7 +103,7 @@ func DeleteList(nc *nats.Conn, id, userID string) error {
 		return fmt.Errorf("marshal delete list request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.list.delete", data, requestTimeout)
+	msg, err := request(nc, "todo.list.delete", data, correlationID)
 	if err != nil {
 		return fmt.Errorf("nats request: %w", err)
 	}
@@ -128,14 +128,7 @@ func CreateItem(nc *nats.Conn, listID, userID, title, correlationID string) (*to
 		return nil, fmt.Errorf("marshal create item request: %w", err)
 	}
 
-	natsMsg := &nats.Msg{
-		Subject: "todo.item.create",
-		Data:    data,
-		Header:  nats.Header{},
-	}
-	natsMsg.Header.Set("X-Correlation-ID", correlationID)
-
-	msg, err := nc.RequestMsg(natsMsg, requestTimeout)
+	msg, err := request(nc, "todo.item.create", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -152,7 +145,7 @@ func CreateItem(nc *nats.Conn, listID, userID, title, correlationID string) (*to
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func GetAllItemsFromList(nc *nats.Conn, listID, userID string) ([]*todov1.Item, error) {
+func GetAllItemsFromList(nc *nats.Conn, listID, userID, correlationID string) ([]*todov1.Item, error) {
 	req := &todov1.GetAllItemsFromListRequest{
 		ListId: listID,
 		UserId: userID,
@@ -163,7 +156,7 @@ func GetAllItemsFromList(nc *nats.Conn, listID, userID string) ([]*todov1.Item, 
 		return nil, fmt.Errorf("marshal get items request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.item.get_all", data, requestTimeout)
+	msg, err := request(nc, "todo.item.get_all", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -191,14 +184,7 @@ func ToggleItemCompleted(nc *nats.Conn, id, userID, correlationID string) (*todo
 		return nil, fmt.Errorf("marshal toggle item request: %w", err)
 	}
 
-	natsMsg := &nats.Msg{
-		Subject: "todo.item.toggle_completed",
-		Data:    data,
-		Header:  nats.Header{},
-	}
-	natsMsg.Header.Set("X-Correlation-ID", correlationID)
-
-	msg, err := nc.RequestMsg(natsMsg, requestTimeout)
+	msg, err := request(nc, "todo.item.toggle_completed", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -227,14 +213,7 @@ func DeleteItem(nc *nats.Conn, id, userID, listID, correlationID string) error {
 		return fmt.Errorf("marshal delete item request: %w", err)
 	}
 
-	natsMsg := &nats.Msg{
-		Subject: "todo.item.delete",
-		Data:    data,
-		Header:  nats.Header{},
-	}
-	natsMsg.Header.Set("X-Correlation-ID", correlationID)
-
-	msg, err := nc.RequestMsg(natsMsg, requestTimeout)
+	msg, err := request(nc, "todo.item.delete", data, correlationID)
 	if err != nil {
 		return fmt.Errorf("nats request: %w", err)
 	}
@@ -246,7 +225,7 @@ func DeleteItem(nc *nats.Conn, id, userID, listID, correlationID string) error {
 	return nil
 }
 
-func AddListMember(nc *nats.Conn, listID, userID, memberEmail string) (*todov1.ListMember, error) {
+func AddListMember(nc *nats.Conn, listID, userID, memberEmail, correlationID string) (*todov1.ListMember, error) {
 	req := &todov1.AddListMemberRequest{
 		ListId:      listID,
 		UserId:      userID,
@@ -258,7 +237,7 @@ func AddListMember(nc *nats.Conn, listID, userID, memberEmail string) (*todov1.L
 		return nil, fmt.Errorf("marshal add list member request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.list.add_member", data, requestTimeout)
+	msg, err := request(nc, "todo.list.add_member", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -275,7 +254,7 @@ func AddListMember(nc *nats.Conn, listID, userID, memberEmail string) (*todov1.L
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func RemoveListMember(nc *nats.Conn, listID, userID, memberUserID string) error {
+func RemoveListMember(nc *nats.Conn, listID, userID, memberUserID, correlationID string) error {
 	req := &todov1.RemoveListMemberRequest{
 		ListId:       listID,
 		UserId:       userID,
@@ -287,7 +266,7 @@ func RemoveListMember(nc *nats.Conn, listID, userID, memberUserID string) error 
 		return fmt.Errorf("marshal remove list member request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.list.remove_member", data, requestTimeout)
+	msg, err := request(nc, "todo.list.remove_member", data, correlationID)
 	if err != nil {
 		return fmt.Errorf("nats request: %w", err)
 	}
@@ -299,7 +278,7 @@ func RemoveListMember(nc *nats.Conn, listID, userID, memberUserID string) error 
 	return nil
 }
 
-func GetListMembers(nc *nats.Conn, listID, userID string) ([]*todov1.ListMember, error) {
+func GetListMembers(nc *nats.Conn, listID, userID, correlationID string) ([]*todov1.ListMember, error) {
 	req := &todov1.GetListMembersRequest{
 		ListId: listID,
 		UserId: userID,
@@ -310,7 +289,7 @@ func GetListMembers(nc *nats.Conn, listID, userID string) ([]*todov1.ListMember,
 		return nil, fmt.Errorf("marshal get list members request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.list.get_members", data, requestTimeout)
+	msg, err := request(nc, "todo.list.get_members", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -327,7 +306,7 @@ func GetListMembers(nc *nats.Conn, listID, userID string) ([]*todov1.ListMember,
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func CreateTemplate(nc *nats.Conn, userID, title string) (*todov1.Template, error) {
+func CreateTemplate(nc *nats.Conn, userID, title, correlationID string) (*todov1.Template, error) {
 	req := &todov1.CreateTemplateRequest{
 		UserId: userID,
 		Title:  title,
@@ -338,7 +317,7 @@ func CreateTemplate(nc *nats.Conn, userID, title string) (*todov1.Template, erro
 		return nil, fmt.Errorf("marshal create template request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.template.create", data, requestTimeout)
+	msg, err := request(nc, "todo.template.create", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -355,7 +334,7 @@ func CreateTemplate(nc *nats.Conn, userID, title string) (*todov1.Template, erro
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func GetTemplatesByUser(nc *nats.Conn, userID string) ([]*todov1.Template, error) {
+func GetTemplatesByUser(nc *nats.Conn, userID, correlationID string) ([]*todov1.Template, error) {
 	req := &todov1.GetTemplatesByUserRequest{
 		UserId: userID,
 	}
@@ -365,7 +344,7 @@ func GetTemplatesByUser(nc *nats.Conn, userID string) ([]*todov1.Template, error
 		return nil, fmt.Errorf("marshal get templates request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.template.get_by_user", data, requestTimeout)
+	msg, err := request(nc, "todo.template.get_by_user", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -382,7 +361,7 @@ func GetTemplatesByUser(nc *nats.Conn, userID string) ([]*todov1.Template, error
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func UpdateTemplateTitle(nc *nats.Conn, id, userID, title string) (*todov1.Template, error) {
+func UpdateTemplateTitle(nc *nats.Conn, id, userID, title, correlationID string) (*todov1.Template, error) {
 	req := &todov1.UpdateTemplateTitleRequest{
 		Id:     id,
 		UserId: userID,
@@ -394,7 +373,7 @@ func UpdateTemplateTitle(nc *nats.Conn, id, userID, title string) (*todov1.Templ
 		return nil, fmt.Errorf("marshal update template title request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.template.update_title", data, requestTimeout)
+	msg, err := request(nc, "todo.template.update_title", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -411,7 +390,7 @@ func UpdateTemplateTitle(nc *nats.Conn, id, userID, title string) (*todov1.Templ
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func DeleteTemplate(nc *nats.Conn, id, userID string) error {
+func DeleteTemplate(nc *nats.Conn, id, userID, correlationID string) error {
 	req := &todov1.DeleteTemplateRequest{
 		Id:     id,
 		UserId: userID,
@@ -422,7 +401,7 @@ func DeleteTemplate(nc *nats.Conn, id, userID string) error {
 		return fmt.Errorf("marshal delete template request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.template.delete", data, requestTimeout)
+	msg, err := request(nc, "todo.template.delete", data, correlationID)
 	if err != nil {
 		return fmt.Errorf("nats request: %w", err)
 	}
@@ -435,7 +414,7 @@ func DeleteTemplate(nc *nats.Conn, id, userID string) error {
 	return nil
 }
 
-func CreateTemplateItem(nc *nats.Conn, templateID, userID, title string) (*todov1.TemplateItem, error) {
+func CreateTemplateItem(nc *nats.Conn, templateID, userID, title, correlationID string) (*todov1.TemplateItem, error) {
 	req := &todov1.CreateTemplateItemRequest{
 		TemplateId: templateID,
 		UserId:     userID,
@@ -447,7 +426,7 @@ func CreateTemplateItem(nc *nats.Conn, templateID, userID, title string) (*todov
 		return nil, fmt.Errorf("marshal create template item request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.template_item.create", data, requestTimeout)
+	msg, err := request(nc, "todo.template_item.create", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -464,7 +443,7 @@ func CreateTemplateItem(nc *nats.Conn, templateID, userID, title string) (*todov
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func GetTemplateItems(nc *nats.Conn, templateID, userID string) ([]*todov1.TemplateItem, error) {
+func GetTemplateItems(nc *nats.Conn, templateID, userID, correlationID string) ([]*todov1.TemplateItem, error) {
 	req := &todov1.GetTemplateItemsRequest{
 		TemplateId: templateID,
 		UserId:     userID,
@@ -475,7 +454,7 @@ func GetTemplateItems(nc *nats.Conn, templateID, userID string) ([]*todov1.Templ
 		return nil, fmt.Errorf("marshal get template items request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.template_item.get_all", data, requestTimeout)
+	msg, err := request(nc, "todo.template_item.get_all", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -492,7 +471,7 @@ func GetTemplateItems(nc *nats.Conn, templateID, userID string) ([]*todov1.Templ
 	return nil, fmt.Errorf("unexpected response from todo service")
 }
 
-func DeleteTemplateItem(nc *nats.Conn, id, userID string) error {
+func DeleteTemplateItem(nc *nats.Conn, id, userID, correlationID string) error {
 	req := &todov1.DeleteTemplateItemRequest{
 		Id:     id,
 		UserId: userID,
@@ -503,7 +482,7 @@ func DeleteTemplateItem(nc *nats.Conn, id, userID string) error {
 		return fmt.Errorf("marshal delete template item request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.template_item.delete", data, requestTimeout)
+	msg, err := request(nc, "todo.template_item.delete", data, correlationID)
 	if err != nil {
 		return fmt.Errorf("nats request: %w", err)
 	}
@@ -516,7 +495,7 @@ func DeleteTemplateItem(nc *nats.Conn, id, userID string) error {
 	return nil
 }
 
-func UseTemplate(nc *nats.Conn, templateID, userID, title string) (*todov1.List, error) {
+func UseTemplate(nc *nats.Conn, templateID, userID, title, correlationID string) (*todov1.List, error) {
 	req := &todov1.UseTemplateRequest{
 		TemplateId: templateID,
 		UserId:     userID,
@@ -528,7 +507,7 @@ func UseTemplate(nc *nats.Conn, templateID, userID, title string) (*todov1.List,
 		return nil, fmt.Errorf("marshal use template request: %w", err)
 	}
 
-	msg, err := nc.Request("todo.template.use", data, requestTimeout)
+	msg, err := request(nc, "todo.template.use", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}

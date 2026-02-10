@@ -9,13 +9,15 @@ import (
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
 	"github.com/terjelafton/platform/apps/web/internal/natsclient"
 	"github.com/terjelafton/platform/apps/web/internal/templates"
+	applogger "github.com/terjelafton/platform/libs/logger"
 )
 
 func HandleCreateListPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		templateList, err := natsclient.GetTemplatesByUser(nc, userID)
+		templateList, err := natsclient.GetTemplatesByUser(nc, userID, correlationID)
 		if err != nil {
 			logger.Error("failed to get templates", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load templates", http.StatusInternalServerError)
@@ -31,9 +33,10 @@ func HandleCreateListFromForm(nc *nats.Conn, logger *slog.Logger) http.HandlerFu
 		userID := middleware.UserIDFromContext(r.Context())
 		title := r.FormValue("title")
 		templateID := r.FormValue("template_id")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
 		if templateID != "" {
-			list, err := natsclient.UseTemplate(nc, templateID, userID, title)
+			list, err := natsclient.UseTemplate(nc, templateID, userID, title, correlationID)
 			if err != nil {
 				logger.Warn("failed to use template", "error", err, "user_id", userID, "template_id", templateID)
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -49,7 +52,7 @@ func HandleCreateListFromForm(nc *nats.Conn, logger *slog.Logger) http.HandlerFu
 			return
 		}
 
-		list, err := natsclient.CreateList(nc, userID, title)
+		list, err := natsclient.CreateList(nc, userID, title, correlationID)
 		if err != nil {
 			logger.Warn("failed to create list", "error", err, "user_id", userID, "title", title)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -63,8 +66,9 @@ func HandleCreateListFromForm(nc *nats.Conn, logger *slog.Logger) http.HandlerFu
 func HandleTemplatesPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		templateList, err := natsclient.GetTemplatesByUser(nc, userID)
+		templateList, err := natsclient.GetTemplatesByUser(nc, userID, correlationID)
 		if err != nil {
 			logger.Error("failed to get templates", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load templates", http.StatusInternalServerError)
@@ -79,8 +83,9 @@ func HandleCreateTemplate(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		title := r.FormValue("title")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		_, err := natsclient.CreateTemplate(nc, userID, title)
+		_, err := natsclient.CreateTemplate(nc, userID, title, correlationID)
 		if err != nil {
 			logger.Warn("failed to create template", "error", err, "user_id", userID, "title", title)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -95,8 +100,9 @@ func HandleDeleteTemplate(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		err := natsclient.DeleteTemplate(nc, id, userID)
+		err := natsclient.DeleteTemplate(nc, id, userID, correlationID)
 		if err != nil {
 			logger.Warn("failed to delete template", "error", err, "user_id", userID, "template_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -111,8 +117,9 @@ func HandleTemplateDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		templateList, err := natsclient.GetTemplatesByUser(nc, userID)
+		templateList, err := natsclient.GetTemplatesByUser(nc, userID, correlationID)
 		if err != nil {
 			logger.Error("failed to get templates", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load templates", http.StatusInternalServerError)
@@ -121,7 +128,7 @@ func HandleTemplateDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 
 		for _, t := range templateList {
 			if t.Id == id {
-				items, err := natsclient.GetTemplateItems(nc, id, userID)
+				items, err := natsclient.GetTemplateItems(nc, id, userID, correlationID)
 				if err != nil {
 					logger.Error("failed to get template items", "error", err, "user_id", userID, "template_id", id)
 					http.Error(w, "Failed to load template items", http.StatusInternalServerError)
@@ -142,8 +149,9 @@ func HandleUpdateTemplateTitle(nc *nats.Conn, logger *slog.Logger) http.HandlerF
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
 		title := r.FormValue("title")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		_, err := natsclient.UpdateTemplateTitle(nc, id, userID, title)
+		_, err := natsclient.UpdateTemplateTitle(nc, id, userID, title, correlationID)
 		if err != nil {
 			logger.Warn("failed to update template title", "error", err, "user_id", userID, "template_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -159,8 +167,9 @@ func HandleCreateTemplateItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFu
 		userID := middleware.UserIDFromContext(r.Context())
 		templateID := r.PathValue("id")
 		title := r.FormValue("title")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		item, err := natsclient.CreateTemplateItem(nc, templateID, userID, title)
+		item, err := natsclient.CreateTemplateItem(nc, templateID, userID, title, correlationID)
 		if err != nil {
 			logger.Warn("failed to create template item", "error", err, "user_id", userID, "template_id", templateID)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -175,8 +184,9 @@ func HandleDeleteTemplateItem(nc *nats.Conn, logger *slog.Logger) http.HandlerFu
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("itemId")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		err := natsclient.DeleteTemplateItem(nc, id, userID)
+		err := natsclient.DeleteTemplateItem(nc, id, userID, correlationID)
 		if err != nil {
 			logger.Warn("failed to delete template item", "error", err, "user_id", userID, "template_item_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)

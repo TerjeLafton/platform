@@ -9,13 +9,17 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/terjelafton/platform/apps/todo/internal/service"
+	applogger "github.com/terjelafton/platform/libs/logger"
 	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
 )
 
 func (h *Handler) HandleAddListMember(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.AddListMemberRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
@@ -32,12 +36,12 @@ func (h *Handler) HandleAddListMember(msg *nats.Msg) {
 		return
 	}
 
-	member, err := h.service.AddListMember(context.Background(), listID, userID, req.MemberEmail)
+	member, err := h.service.AddListMember(ctx, listID, userID, req.MemberEmail)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "list_id", listID, "user_id", userID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "list_id", listID, "user_id", userID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return
@@ -54,9 +58,12 @@ func (h *Handler) HandleAddListMember(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleRemoveListMember(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.RemoveListMemberRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
@@ -79,11 +86,11 @@ func (h *Handler) HandleRemoveListMember(msg *nats.Msg) {
 		return
 	}
 
-	if err := h.service.RemoveListMember(context.Background(), listID, userID, memberUserID); err != nil {
+	if err := h.service.RemoveListMember(ctx, listID, userID, memberUserID); err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "list_id", listID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "list_id", listID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return
@@ -93,9 +100,12 @@ func (h *Handler) HandleRemoveListMember(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleGetListMembers(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.GetListMembersRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
@@ -112,12 +122,12 @@ func (h *Handler) HandleGetListMembers(msg *nats.Msg) {
 		return
 	}
 
-	members, err := h.service.GetListMembers(context.Background(), listID, userID)
+	members, err := h.service.GetListMembers(ctx, listID, userID)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "list_id", listID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "list_id", listID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return

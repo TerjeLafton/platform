@@ -9,31 +9,35 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/terjelafton/platform/apps/todo/internal/service"
+	applogger "github.com/terjelafton/platform/libs/logger"
 	todov1 "github.com/terjelafton/platform/libs/proto-stubs/todo/v1"
 )
 
 func (h *Handler) HandleCreateTemplate(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.CreateTemplateRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid user ID format")
 		return
 	}
 
-	template, err := h.service.CreateTemplate(context.Background(), userID, req.Title)
+	template, err := h.service.CreateTemplate(ctx, userID, req.Title)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
-			h.logger.Warn("validation failed", "error", err, "user_id", userID)
+			h.logger.WarnContext(ctx, "validation failed", "error", err, "user_id", userID)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "user_id", userID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "user_id", userID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return
@@ -51,23 +55,26 @@ func (h *Handler) HandleCreateTemplate(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleGetTemplatesByUser(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.GetTemplatesByUserRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid user ID format")
 		return
 	}
 
-	templates, err := h.service.GetTemplatesByUser(context.Background(), userID)
+	templates, err := h.service.GetTemplatesByUser(ctx, userID)
 	if err != nil {
-		h.logger.Error("service error", "error", err, "user_id", userID)
+		h.logger.ErrorContext(ctx, "service error", "error", err, "user_id", userID)
 		h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		return
 	}
@@ -90,34 +97,37 @@ func (h *Handler) HandleGetTemplatesByUser(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleUpdateTemplateTitle(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.UpdateTemplateTitleRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	templateID, err := uuid.Parse(req.Id)
 	if err != nil {
-		h.logger.Warn("invalid template_id", "subject", msg.Subject, "template_id", req.Id)
+		h.logger.WarnContext(ctx, "invalid template_id", "subject", msg.Subject, "template_id", req.Id)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid template ID format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid user ID format")
 		return
 	}
 
-	template, err := h.service.UpdateTemplateTitle(context.Background(), templateID, userID, req.Title)
+	template, err := h.service.UpdateTemplateTitle(ctx, templateID, userID, req.Title)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
-			h.logger.Warn("validation failed", "error", err, "template_id", templateID, "user_id", userID)
+			h.logger.WarnContext(ctx, "validation failed", "error", err, "template_id", templateID, "user_id", userID)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "template_id", templateID, "user_id", userID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "template_id", templateID, "user_id", userID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return
@@ -135,33 +145,36 @@ func (h *Handler) HandleUpdateTemplateTitle(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleDeleteTemplate(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.DeleteTemplateRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	templateID, err := uuid.Parse(req.Id)
 	if err != nil {
-		h.logger.Warn("invalid template_id", "subject", msg.Subject, "template_id", req.Id)
+		h.logger.WarnContext(ctx, "invalid template_id", "subject", msg.Subject, "template_id", req.Id)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid template ID format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid user ID format")
 		return
 	}
 
-	if err := h.service.DeleteTemplate(context.Background(), templateID, userID); err != nil {
+	if err := h.service.DeleteTemplate(ctx, templateID, userID); err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
-			h.logger.Warn("delete failed", "error", valErr.Message, "template_id", templateID, "user_id", userID)
+			h.logger.WarnContext(ctx, "delete failed", "error", valErr.Message, "template_id", templateID, "user_id", userID)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "template_id", templateID, "user_id", userID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "template_id", templateID, "user_id", userID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return
@@ -171,34 +184,37 @@ func (h *Handler) HandleDeleteTemplate(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleCreateTemplateItem(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.CreateTemplateItemRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	templateID, err := uuid.Parse(req.TemplateId)
 	if err != nil {
-		h.logger.Warn("invalid template_id", "subject", msg.Subject, "template_id", req.TemplateId)
+		h.logger.WarnContext(ctx, "invalid template_id", "subject", msg.Subject, "template_id", req.TemplateId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid template ID format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid user ID format")
 		return
 	}
 
-	item, err := h.service.CreateTemplateItem(context.Background(), templateID, userID, req.Title)
+	item, err := h.service.CreateTemplateItem(ctx, templateID, userID, req.Title)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
-			h.logger.Warn("validation failed", "error", err, "template_id", templateID, "user_id", userID)
+			h.logger.WarnContext(ctx, "validation failed", "error", err, "template_id", templateID, "user_id", userID)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "template_id", templateID, "user_id", userID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "template_id", templateID, "user_id", userID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return
@@ -215,30 +231,33 @@ func (h *Handler) HandleCreateTemplateItem(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleGetTemplateItems(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.GetTemplateItemsRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	templateID, err := uuid.Parse(req.TemplateId)
 	if err != nil {
-		h.logger.Warn("invalid template_id", "subject", msg.Subject, "template_id", req.TemplateId)
+		h.logger.WarnContext(ctx, "invalid template_id", "subject", msg.Subject, "template_id", req.TemplateId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid template ID format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid user ID format")
 		return
 	}
 
-	items, err := h.service.GetTemplateItems(context.Background(), templateID, userID)
+	items, err := h.service.GetTemplateItems(ctx, templateID, userID)
 	if err != nil {
-		h.logger.Error("service error", "error", err, "template_id", templateID, "user_id", userID)
+		h.logger.ErrorContext(ctx, "service error", "error", err, "template_id", templateID, "user_id", userID)
 		h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		return
 	}
@@ -259,33 +278,36 @@ func (h *Handler) HandleGetTemplateItems(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleDeleteTemplateItem(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.DeleteTemplateItemRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	itemID, err := uuid.Parse(req.Id)
 	if err != nil {
-		h.logger.Warn("invalid item_id", "subject", msg.Subject, "item_id", req.Id)
+		h.logger.WarnContext(ctx, "invalid item_id", "subject", msg.Subject, "item_id", req.Id)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid item ID format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid user ID format")
 		return
 	}
 
-	if err := h.service.DeleteTemplateItem(context.Background(), itemID, userID); err != nil {
+	if err := h.service.DeleteTemplateItem(ctx, itemID, userID); err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
-			h.logger.Warn("delete failed", "error", valErr.Message, "item_id", itemID, "user_id", userID)
+			h.logger.WarnContext(ctx, "delete failed", "error", valErr.Message, "item_id", itemID, "user_id", userID)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "item_id", itemID, "user_id", userID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "item_id", itemID, "user_id", userID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return
@@ -295,34 +317,37 @@ func (h *Handler) HandleDeleteTemplateItem(msg *nats.Msg) {
 }
 
 func (h *Handler) HandleUseTemplate(msg *nats.Msg) {
+	correlationID := msg.Header.Get("X-Correlation-ID")
+	ctx := applogger.WithCorrelationID(context.Background(), correlationID)
+
 	var req todov1.UseTemplateRequest
 	if err := proto.Unmarshal(msg.Data, &req); err != nil {
-		h.logger.Warn("failed to unmarshal request", "subject", msg.Subject, "error", err)
+		h.logger.WarnContext(ctx, "failed to unmarshal request", "subject", msg.Subject, "error", err)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid request format")
 		return
 	}
 
 	templateID, err := uuid.Parse(req.TemplateId)
 	if err != nil {
-		h.logger.Warn("invalid template_id", "subject", msg.Subject, "template_id", req.TemplateId)
+		h.logger.WarnContext(ctx, "invalid template_id", "subject", msg.Subject, "template_id", req.TemplateId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid template ID format")
 		return
 	}
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		h.logger.Warn("invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
+		h.logger.WarnContext(ctx, "invalid user_id", "subject", msg.Subject, "user_id", req.UserId)
 		h.respondError(msg, "INVALID_REQUEST", "Invalid user ID format")
 		return
 	}
 
-	list, err := h.service.UseTemplate(context.Background(), templateID, userID, req.Title)
+	list, err := h.service.UseTemplate(ctx, templateID, userID, req.Title)
 	if err != nil {
 		if valErr, ok := err.(*service.ValidationError); ok {
-			h.logger.Warn("validation failed", "error", err, "template_id", templateID, "user_id", userID)
+			h.logger.WarnContext(ctx, "validation failed", "error", err, "template_id", templateID, "user_id", userID)
 			h.respondError(msg, "VALIDATION_ERROR", valErr.Message)
 		} else {
-			h.logger.Error("service error", "error", err, "template_id", templateID, "user_id", userID)
+			h.logger.ErrorContext(ctx, "service error", "error", err, "template_id", templateID, "user_id", userID)
 			h.respondError(msg, "INTERNAL_ERROR", "Internal server error")
 		}
 		return

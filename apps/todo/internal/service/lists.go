@@ -32,18 +32,18 @@ func (s *Service) CreateList(
 		Title:  title,
 	})
 	if err != nil {
-		s.logger.Error("database error", "error", err, "user_id", userID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.Info("list created", "list_id", list.ID, "user_id", userID)
+	s.logger.InfoContext(ctx, "list created", "list_id", list.ID, "user_id", userID)
 
 	s.publishListCreated(ctx, list)
 
 	return &list, nil
 }
 
-func (s *Service) publishListCreated(_ context.Context, list db.TodoList) {
+func (s *Service) publishListCreated(ctx context.Context, list db.TodoList) {
 	event := &todov1.ListCreatedEvent{
 		List: &todov1.List{
 			Id:        list.ID.String(),
@@ -57,25 +57,25 @@ func (s *Service) publishListCreated(_ context.Context, list db.TodoList) {
 
 	data, err := proto.Marshal(event)
 	if err != nil {
-		s.logger.Error("failed to marshal event", "error", err, "list_id", list.ID)
+		s.logger.ErrorContext(ctx, "failed to marshal event", "error", err, "list_id", list.ID)
 		return
 	}
 
 	if err := s.nc.Publish("todo.list.created", data); err != nil {
-		s.logger.Warn("failed to publish event", "error", err, "list_id", list.ID)
+		s.logger.WarnContext(ctx, "failed to publish event", "error", err, "list_id", list.ID)
 	} else {
-		s.logger.Info("event published", "subject", "todo.list.created", "list_id", list.ID)
+		s.logger.InfoContext(ctx, "event published", "subject", "todo.list.created", "list_id", list.ID)
 	}
 }
 
 func (s *Service) GetListsByUser(ctx context.Context, userID uuid.UUID) ([]db.GetListsByUserRow, error) {
 	lists, err := s.queries.GetListsByUser(ctx, userID)
 	if err != nil {
-		s.logger.Error("database error", "error", err, "user_id", userID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.Info("lists retrieved", "user_id", userID, "count", len(lists))
+	s.logger.InfoContext(ctx, "lists retrieved", "user_id", userID, "count", len(lists))
 
 	return lists, nil
 }
@@ -86,11 +86,11 @@ func (s *Service) DeleteList(ctx context.Context, listID, userID uuid.UUID) erro
 		UserID: userID,
 	})
 	if err != nil {
-		s.logger.Error("database error", "error", err, "list_id", listID, "user_id", userID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID, "user_id", userID)
 		return translateDBError(err)
 	}
 
-	s.logger.Info("list deleted", "list_id", listID, "user_id", userID)
+	s.logger.InfoContext(ctx, "list deleted", "list_id", listID, "user_id", userID)
 
 	return nil
 }
@@ -116,11 +116,11 @@ func (s *Service) UpdateListTitle(
 		Title:  title,
 	})
 	if err != nil {
-		s.logger.Error("database error", "error", err, "list_id", listID, "user_id", userID)
+		s.logger.ErrorContext(ctx, "database error", "error", err, "list_id", listID, "user_id", userID)
 		return nil, translateDBError(err)
 	}
 
-	s.logger.Info("list title updated", "list_id", listID, "user_id", userID)
+	s.logger.InfoContext(ctx, "list title updated", "list_id", listID, "user_id", userID)
 
 	return &list, nil
 }

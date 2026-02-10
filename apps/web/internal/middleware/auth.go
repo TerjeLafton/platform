@@ -7,6 +7,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/terjelafton/platform/apps/web/internal/natsclient"
+	applogger "github.com/terjelafton/platform/libs/logger"
 )
 
 type contextKey struct{}
@@ -27,7 +28,9 @@ func RequireAuth(nc *nats.Conn, cookieName string, logger *slog.Logger) func(htt
 				return
 			}
 
-			userID, err := natsclient.ValidateToken(nc, cookie.Value)
+			correlationID := applogger.CorrelationIDFromContext(r.Context())
+
+			userID, err := natsclient.ValidateToken(nc, cookie.Value, correlationID)
 			if err != nil {
 				if _, ok := err.(*natsclient.ServiceError); ok {
 					logger.Info("invalid token, redirecting to login")

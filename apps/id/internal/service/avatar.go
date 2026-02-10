@@ -19,7 +19,7 @@ var allowedContentTypes = map[string]bool{
 func (s *Service) GetAvatar(ctx context.Context, userID uuid.UUID) ([]byte, string, error) {
 	row, err := s.queries.GetUserAvatar(ctx, userID)
 	if err != nil {
-		s.logger.Error("failed to get avatar", "error", err, "user_id", userID)
+		s.logger.ErrorContext(ctx,"failed to get avatar", "error", err, "user_id", userID)
 		return nil, "", fmt.Errorf("internal error")
 	}
 	if row.Avatar == nil {
@@ -49,10 +49,10 @@ func (s *Service) UpdateAvatar(ctx context.Context, userID uuid.UUID, data []byt
 		AvatarContentType: sql.NullString{String: contentType, Valid: true},
 	})
 	if err != nil {
-		s.logger.Error("failed to update avatar", "error", err, "user_id", userID)
+		s.logger.ErrorContext(ctx,"failed to update avatar", "error", err, "user_id", userID)
 		return fmt.Errorf("internal error")
 	}
 
-	s.logger.Info("avatar updated", "user_id", userID)
+	s.logger.InfoContext(ctx,"avatar updated", "user_id", userID)
 	return nil
 }

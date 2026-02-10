@@ -8,13 +8,15 @@ import (
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
 	"github.com/terjelafton/platform/apps/web/internal/natsclient"
 	"github.com/terjelafton/platform/apps/web/internal/templates"
+	applogger "github.com/terjelafton/platform/libs/logger"
 )
 
 func HandleHomePage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		user, err := natsclient.GetUser(nc, userID)
+		user, err := natsclient.GetUser(nc, userID, correlationID)
 		if err != nil {
 			logger.Error("failed to get user", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load home", http.StatusInternalServerError)

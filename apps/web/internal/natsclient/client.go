@@ -21,7 +21,19 @@ func (e *ServiceError) Error() string {
 	return e.Message
 }
 
-func Login(nc *nats.Conn, email, password string) (string, error) {
+func request(nc *nats.Conn, subject string, data []byte, correlationID string) (*nats.Msg, error) {
+	msg := &nats.Msg{
+		Subject: subject,
+		Data:    data,
+	}
+	if correlationID != "" {
+		msg.Header = nats.Header{}
+		msg.Header.Set("X-Correlation-ID", correlationID)
+	}
+	return nc.RequestMsg(msg, requestTimeout)
+}
+
+func Login(nc *nats.Conn, email, password, correlationID string) (string, error) {
 	req := &idv1.LoginRequest{
 		Email:    email,
 		Password: password,
@@ -32,7 +44,7 @@ func Login(nc *nats.Conn, email, password string) (string, error) {
 		return "", fmt.Errorf("marshal login request: %w", err)
 	}
 
-	msg, err := nc.Request("id.auth.login", data, requestTimeout)
+	msg, err := request(nc, "id.auth.login", data, correlationID)
 	if err != nil {
 		return "", fmt.Errorf("nats request: %w", err)
 	}
@@ -51,7 +63,7 @@ func Login(nc *nats.Conn, email, password string) (string, error) {
 	return "", fmt.Errorf("unexpected response from id service")
 }
 
-func Register(nc *nats.Conn, email, password, name string) (string, error) {
+func Register(nc *nats.Conn, email, password, name, correlationID string) (string, error) {
 	req := &idv1.RegisterRequest{
 		Email:    email,
 		Password: password,
@@ -63,7 +75,7 @@ func Register(nc *nats.Conn, email, password, name string) (string, error) {
 		return "", fmt.Errorf("marshal register request: %w", err)
 	}
 
-	msg, err := nc.Request("id.auth.register", data, requestTimeout)
+	msg, err := request(nc, "id.auth.register", data, correlationID)
 	if err != nil {
 		return "", fmt.Errorf("nats request: %w", err)
 	}
@@ -82,7 +94,7 @@ func Register(nc *nats.Conn, email, password, name string) (string, error) {
 	return "", fmt.Errorf("unexpected response from id service")
 }
 
-func ValidateToken(nc *nats.Conn, token string) (string, error) {
+func ValidateToken(nc *nats.Conn, token, correlationID string) (string, error) {
 	req := &idv1.ValidateTokenRequest{
 		Token: token,
 	}
@@ -92,7 +104,7 @@ func ValidateToken(nc *nats.Conn, token string) (string, error) {
 		return "", fmt.Errorf("marshal validate request: %w", err)
 	}
 
-	msg, err := nc.Request("id.auth.validate", data, requestTimeout)
+	msg, err := request(nc, "id.auth.validate", data, correlationID)
 	if err != nil {
 		return "", fmt.Errorf("nats request: %w", err)
 	}
@@ -111,7 +123,7 @@ func ValidateToken(nc *nats.Conn, token string) (string, error) {
 	return "", fmt.Errorf("unexpected response from id service")
 }
 
-func GetUser(nc *nats.Conn, userID string) (*idv1.User, error) {
+func GetUser(nc *nats.Conn, userID, correlationID string) (*idv1.User, error) {
 	req := &idv1.GetUserRequest{
 		UserId: userID,
 	}
@@ -121,7 +133,7 @@ func GetUser(nc *nats.Conn, userID string) (*idv1.User, error) {
 		return nil, fmt.Errorf("marshal get user request: %w", err)
 	}
 
-	msg, err := nc.Request("id.user.get", data, requestTimeout)
+	msg, err := request(nc, "id.user.get", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}
@@ -138,7 +150,7 @@ func GetUser(nc *nats.Conn, userID string) (*idv1.User, error) {
 	return nil, fmt.Errorf("unexpected response from id service")
 }
 
-func GetAvatar(nc *nats.Conn, userID string) ([]byte, string, error) {
+func GetAvatar(nc *nats.Conn, userID, correlationID string) ([]byte, string, error) {
 	req := &idv1.GetAvatarRequest{
 		UserId: userID,
 	}
@@ -148,7 +160,7 @@ func GetAvatar(nc *nats.Conn, userID string) ([]byte, string, error) {
 		return nil, "", fmt.Errorf("marshal get avatar request: %w", err)
 	}
 
-	msg, err := nc.Request("id.user.avatar", data, requestTimeout)
+	msg, err := request(nc, "id.user.avatar", data, correlationID)
 	if err != nil {
 		return nil, "", fmt.Errorf("nats request: %w", err)
 	}
@@ -166,7 +178,7 @@ func GetAvatar(nc *nats.Conn, userID string) ([]byte, string, error) {
 	return nil, "", nil
 }
 
-func UpdateAvatar(nc *nats.Conn, userID string, avatar []byte, contentType string) error {
+func UpdateAvatar(nc *nats.Conn, userID string, avatar []byte, contentType, correlationID string) error {
 	req := &idv1.UpdateAvatarRequest{
 		UserId:      userID,
 		Avatar:      avatar,
@@ -178,7 +190,7 @@ func UpdateAvatar(nc *nats.Conn, userID string, avatar []byte, contentType strin
 		return fmt.Errorf("marshal update avatar request: %w", err)
 	}
 
-	msg, err := nc.Request("id.user.avatar.update", data, requestTimeout)
+	msg, err := request(nc, "id.user.avatar.update", data, correlationID)
 	if err != nil {
 		return fmt.Errorf("nats request: %w", err)
 	}
@@ -190,7 +202,7 @@ func UpdateAvatar(nc *nats.Conn, userID string, avatar []byte, contentType strin
 	return nil
 }
 
-func GetUserByEmail(nc *nats.Conn, email string) (*idv1.User, error) {
+func GetUserByEmail(nc *nats.Conn, email, correlationID string) (*idv1.User, error) {
 	req := &idv1.GetUserByEmailRequest{
 		Email: email,
 	}
@@ -200,7 +212,7 @@ func GetUserByEmail(nc *nats.Conn, email string) (*idv1.User, error) {
 		return nil, fmt.Errorf("marshal get user by email request: %w", err)
 	}
 
-	msg, err := nc.Request("id.user.get_by_email", data, requestTimeout)
+	msg, err := request(nc, "id.user.get_by_email", data, correlationID)
 	if err != nil {
 		return nil, fmt.Errorf("nats request: %w", err)
 	}

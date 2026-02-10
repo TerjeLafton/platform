@@ -5,19 +5,20 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"github.com/terjelafton/platform/apps/web/internal/middleware"
 	"github.com/terjelafton/platform/apps/web/internal/natsclient"
 	"github.com/terjelafton/platform/apps/web/internal/sse"
 	"github.com/terjelafton/platform/apps/web/internal/templates"
+	applogger "github.com/terjelafton/platform/libs/logger"
 )
 
 func HandleListsPage(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		lists, err := natsclient.GetListsByUser(nc, userID)
+		lists, err := natsclient.GetListsByUser(nc, userID, correlationID)
 		if err != nil {
 			logger.Error("failed to get lists", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load lists", http.StatusInternalServerError)
@@ -32,8 +33,9 @@ func HandleDeleteList(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		err := natsclient.DeleteList(nc, id, userID)
+		err := natsclient.DeleteList(nc, id, userID, correlationID)
 		if err != nil {
 			logger.Warn("failed to delete list", "error", err, "user_id", userID, "list_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -48,8 +50,9 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		lists, err := natsclient.GetListsByUser(nc, userID)
+		lists, err := natsclient.GetListsByUser(nc, userID, correlationID)
 		if err != nil {
 			logger.Error("failed to get lists", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load list", http.StatusInternalServerError)
@@ -59,7 +62,7 @@ func HandleListDetail(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 		var found bool
 		for _, list := range lists {
 			if list.Id == id {
-				items, err := natsclient.GetAllItemsFromList(nc, id, userID)
+				items, err := natsclient.GetAllItemsFromList(nc, id, userID, correlationID)
 				if err != nil {
 					logger.Error("failed to get items", "error", err, "user_id", userID, "list_id", id)
 					http.Error(w, "Failed to load items", http.StatusInternalServerError)
@@ -82,8 +85,9 @@ func HandleListSettings(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		lists, err := natsclient.GetListsByUser(nc, userID)
+		lists, err := natsclient.GetListsByUser(nc, userID, correlationID)
 		if err != nil {
 			logger.Error("failed to get lists", "error", err, "user_id", userID)
 			http.Error(w, "Failed to load list", http.StatusInternalServerError)
@@ -97,7 +101,7 @@ func HandleListSettings(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 					return
 				}
 
-				members, err := natsclient.GetListMembers(nc, id, userID)
+				members, err := natsclient.GetListMembers(nc, id, userID, correlationID)
 				if err != nil {
 					logger.Error("failed to get members", "error", err, "user_id", userID, "list_id", id)
 					http.Error(w, "Failed to load members", http.StatusInternalServerError)
@@ -118,8 +122,9 @@ func HandleUpdateListTitle(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc 
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
 		title := r.FormValue("title")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		_, err := natsclient.UpdateListTitle(nc, id, userID, title)
+		_, err := natsclient.UpdateListTitle(nc, id, userID, title, correlationID)
 		if err != nil {
 			logger.Warn("failed to update list title", "error", err, "user_id", userID, "list_id", id)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -136,7 +141,7 @@ func HandleCreateItem(nc *nats.Conn, sseManager *sse.Manager, logger *slog.Logge
 		listID := r.PathValue("id")
 		title := r.FormValue("title")
 
-		correlationID := uuid.New().String()
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 		sseManager.AddCorrelationID(userID, correlationID)
 
 		item, err := natsclient.CreateItem(nc, listID, userID, title, correlationID)
@@ -155,7 +160,7 @@ func HandleToggleItem(nc *nats.Conn, sseManager *sse.Manager, logger *slog.Logge
 		userID := middleware.UserIDFromContext(r.Context())
 		id := r.PathValue("id")
 
-		correlationID := uuid.New().String()
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 		sseManager.AddCorrelationID(userID, correlationID)
 
 		item, err := natsclient.ToggleItemCompleted(nc, id, userID, correlationID)
@@ -175,7 +180,7 @@ func HandleDeleteItem(nc *nats.Conn, sseManager *sse.Manager, logger *slog.Logge
 		id := r.PathValue("id")
 		listID := r.URL.Query().Get("list_id")
 
-		correlationID := uuid.New().String()
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 		sseManager.AddCorrelationID(userID, correlationID)
 
 		err := natsclient.DeleteItem(nc, id, userID, listID, correlationID)
@@ -194,8 +199,9 @@ func HandleAddListMember(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 		userID := middleware.UserIDFromContext(r.Context())
 		listID := r.PathValue("id")
 		email := r.FormValue("email")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		member, err := natsclient.AddListMember(nc, listID, userID, email)
+		member, err := natsclient.AddListMember(nc, listID, userID, email, correlationID)
 		if err != nil {
 			logger.Warn("failed to add member", "error", err, "user_id", userID, "list_id", listID, "email", email)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -211,8 +217,9 @@ func HandleRemoveListMember(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc
 		userID := middleware.UserIDFromContext(r.Context())
 		listID := r.PathValue("id")
 		memberID := r.PathValue("memberID")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		err := natsclient.RemoveListMember(nc, listID, userID, memberID)
+		err := natsclient.RemoveListMember(nc, listID, userID, memberID, correlationID)
 		if err != nil {
 			logger.Warn("failed to remove member", "error", err, "user_id", userID, "list_id", listID, "member_id", memberID)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -227,8 +234,9 @@ func HandleLeaveList(nc *nats.Conn, logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := middleware.UserIDFromContext(r.Context())
 		listID := r.PathValue("id")
+		correlationID := applogger.CorrelationIDFromContext(r.Context())
 
-		err := natsclient.RemoveListMember(nc, listID, userID, userID)
+		err := natsclient.RemoveListMember(nc, listID, userID, userID, correlationID)
 		if err != nil {
 			logger.Warn("failed to leave list", "error", err, "user_id", userID, "list_id", listID)
 			http.Error(w, err.Error(), http.StatusBadRequest)

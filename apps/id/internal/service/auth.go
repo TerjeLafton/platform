@@ -33,7 +33,7 @@ func (s *Service) Register(ctx context.Context, email, password, name string) (*
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		s.logger.Error("failed to hash password", "error", err)
+		s.logger.ErrorContext(ctx, "failed to hash password", "error", err)
 		return nil, "", fmt.Errorf("internal error")
 	}
 
@@ -46,17 +46,17 @@ func (s *Service) Register(ctx context.Context, email, password, name string) (*
 		if strings.Contains(err.Error(), "unique") || strings.Contains(err.Error(), "duplicate") {
 			return nil, "", &ValidationError{Field: "email", Message: "Email already registered"}
 		}
-		s.logger.Error("failed to create user", "error", err)
+		s.logger.ErrorContext(ctx, "failed to create user", "error", err)
 		return nil, "", fmt.Errorf("internal error")
 	}
 
 	token, err := s.CreateToken(user.ID)
 	if err != nil {
-		s.logger.Error("failed to create token", "error", err, "user_id", user.ID)
+		s.logger.ErrorContext(ctx, "failed to create token", "error", err, "user_id", user.ID)
 		return nil, "", fmt.Errorf("internal error")
 	}
 
-	s.logger.Info("user registered", "user_id", user.ID, "email", email)
+	s.logger.InfoContext(ctx, "user registered", "user_id", user.ID, "email", email)
 	return &user, token, nil
 }
 
@@ -72,25 +72,25 @@ func (s *Service) Login(ctx context.Context, email, password string) (*db.IDUser
 	user, err := s.queries.GetUserByEmail(ctx, email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			s.logger.Warn("login attempt for non-existent email", "email", email)
+			s.logger.WarnContext(ctx, "login attempt for non-existent email", "email", email)
 			return nil, "", &AuthError{Message: "Invalid email or password"}
 		}
-		s.logger.Error("failed to get user", "error", err, "email", email)
+		s.logger.ErrorContext(ctx, "failed to get user", "error", err, "email", email)
 		return nil, "", fmt.Errorf("internal error")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		s.logger.Warn("login attempt with wrong password", "email", email)
+		s.logger.WarnContext(ctx, "login attempt with wrong password", "email", email)
 		return nil, "", &AuthError{Message: "Invalid email or password"}
 	}
 
 	token, err := s.CreateToken(user.ID)
 	if err != nil {
-		s.logger.Error("failed to create token", "error", err, "user_id", user.ID)
+		s.logger.ErrorContext(ctx, "failed to create token", "error", err, "user_id", user.ID)
 		return nil, "", fmt.Errorf("internal error")
 	}
 
-	s.logger.Info("user logged in", "user_id", user.ID, "email", email)
+	s.logger.InfoContext(ctx, "user logged in", "user_id", user.ID, "email", email)
 	return &user, token, nil
 }
 
@@ -105,7 +105,7 @@ func (s *Service) GetUserByEmail(ctx context.Context, email string) (*db.IDUser,
 		if err == sql.ErrNoRows {
 			return nil, &ValidationError{Field: "email", Message: "No account found with that email"}
 		}
-		s.logger.Error("failed to get user by email", "error", err, "email", email)
+		s.logger.ErrorContext(ctx, "failed to get user by email", "error", err, "email", email)
 		return nil, fmt.Errorf("internal error")
 	}
 
@@ -115,7 +115,7 @@ func (s *Service) GetUserByEmail(ctx context.Context, email string) (*db.IDUser,
 func (s *Service) GetUser(ctx context.Context, userID uuid.UUID) (*db.IDUser, error) {
 	user, err := s.queries.GetUserByID(ctx, userID)
 	if err != nil {
-		s.logger.Error("failed to get user", "error", err, "user_id", userID)
+		s.logger.ErrorContext(ctx, "failed to get user", "error", err, "user_id", userID)
 		return nil, fmt.Errorf("internal error")
 	}
 	return &user, nil
